@@ -69,7 +69,7 @@ const AccordionContainer = ({ title, children, initiallyExpanded = false }: Acco
         onPress={toggleAccordion}
         activeOpacity={0.8}
       >
-        <ThemedText>{title.toUpperCase()}</ThemedText>
+        <ThemedText type='title'>{title.toUpperCase()}</ThemedText>
         <Ionicons 
           name={expanded ? "remove" : "add"} 
           size={24} 
@@ -97,23 +97,21 @@ const AccordionContainer = ({ title, children, initiallyExpanded = false }: Acco
 const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
-    marginBottom: 10,
+    // marginBottom: 10,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f9f9f9',
+    paddingVertical: 16,
   },
   contentContainer: {
     overflow: 'hidden',
-    backgroundColor: '#fff',
+    paddingVertical: 16,
   },
   content: {
     position: 'absolute',
     width: '100%',
-    backgroundColor: '#fff',
   },
 });
 

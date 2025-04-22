@@ -10,6 +10,7 @@ export default function HomeScreen() {
       <CategoryCard title='TOPS' />
       <CategoryCard title='LINEN' />
       </View>
+      <View style={{paddingHorizontal: 16}}>
       <Accordion title="Clothing">
         <Accordion.Item 
             label="T-shirts" 
@@ -20,6 +21,7 @@ export default function HomeScreen() {
             onPress={() => {}} 
           />
       </Accordion>
+      </View>
     </GenericScrollView>
   );
 }

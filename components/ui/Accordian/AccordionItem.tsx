@@ -7,6 +7,7 @@ import {
   GestureResponderEvent 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { ThemedText } from '@/components/ThemedText';
 
 interface AccordionItemProps {
   label: string;
@@ -27,9 +28,8 @@ const AccordionItem = ({
         {leftIcon && (
           <Ionicons name={leftIcon as any} size={20} color="#555" style={styles.leftIcon} />
         )}
-        <Text style={styles.itemLabel}>{label}</Text>
+        <ThemedText>{label.toUpperCase()}</ThemedText>
       </View>
-      {rightIcon && <Ionicons name={rightIcon as any} size={18} color="#999" />}
     </TouchableOpacity>
   );
 };
@@ -40,9 +40,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   itemContent: {
     flexDirection: 'row',

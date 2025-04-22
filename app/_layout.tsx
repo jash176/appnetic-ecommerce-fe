@@ -1,5 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
+import { useFonts as useSpaceGrotesk, SpaceGrotesk_500Medium, SpaceGrotesk_600SemiBold } from '@expo-google-fonts/space-grotesk';
+import { useFonts as useDMSans, DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from '@expo-google-fonts/dm-sans';
+
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -13,19 +15,30 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+  const [loadedSG] = useSpaceGrotesk({
+    SpaceGrotesk_500Medium,
+    SpaceGrotesk_600SemiBold,
+  });
+
+  const [loadedDM] = useDMSans({
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
+    DMSans_700Bold,
   });
 
   useEffect(() => {
-    if (loaded) {
+    if (loadedDM && loadedSG) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loadedDM, loadedSG]);
 
-  if (!loaded) {
-    return null;
+  const fontsLoaded = loadedSG && loadedDM;
+
+  if (!fontsLoaded) {
+    return null; // or <AppLoading />
   }
+
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

@@ -32,6 +32,19 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo-google-fonts/space-grotesk/SpaceGrotesk_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/space-grotesk/SpaceGrotesk_500Medium.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/DMSans_400Regular.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/DMSans_500Medium.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/DMSans_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/DMSans_700Bold.ttf"
+          ]
+        }
       ]
     ],
     "experiments": {

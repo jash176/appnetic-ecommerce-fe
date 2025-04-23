@@ -9,12 +9,16 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { ApiProvider } from '@/lib/api/queryProvider';
+import { useAuthStore } from '@/store/authStore';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const checkAuthState = useAuthStore(state => state.checkAuthState);
+  
   const [loadedM] = useSpaceGrotesk({
     Montserrat_600SemiBold,
     Montserrat_700Bold,
@@ -29,9 +33,12 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loadedDM && loadedM) {
-      SplashScreen.hideAsync();
+      // Check auth state when app loads
+      checkAuthState().finally(() => {
+        SplashScreen.hideAsync();
+      });
     }
-  }, [loadedDM, loadedM]);
+  }, [loadedDM, loadedM, checkAuthState]);
 
   const fontsLoaded = loadedM && loadedDM;
 
@@ -39,16 +46,17 @@ export default function RootLayout() {
     return null; // or <AppLoading />
   }
 
-
   return (
-    <GestureHandlerRootView>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </GestureHandlerRootView>
+    <ApiProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="dark" />
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </ApiProvider>
   );
 }

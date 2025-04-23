@@ -10,6 +10,9 @@ import Footer from '@/components/ui/Footer'
 import Accordion from '@/components/ui/Accordion'
 import ProductCard from '@/components/ui/ecommerce/ProductCard'
 import FloatingAddButton from '@/components/ui/ecommerce/FloatingAddButton'
+import { useCartStore } from '@/store/cartStore'
+import { router } from 'expo-router'
+import * as Haptics from 'expo-haptics'
 
 const variants = [
   { id: "1", label: "XSS", value: "XSS" },
@@ -21,10 +24,21 @@ const variants = [
   { id: "7", label: "XXL", value: "XXL" }
 ]
 
+// Mock product data - in a real app, this would come from an API or route params
+const productData = {
+  id: "prod-1",
+  title: "Tie-Belt Shirt Dress",
+  price: 1999.00,
+  image: "https://image.hm.com/content/dam/global_campaigns/season_01/women/startpage-assets/wk16/DS21G-2x3-women-startpage-wk16.jpg?imwidth=320",
+  description: "A stylish shirt dress with a tie belt for a flattering silhouette."
+}
+
 const ProductDetails = () => {
-  const [isAddButtonVisible, setIsAddButtonVisible] = useState(true);
+  const [isAddButtonVisible, setIsAddButtonVisible] = useState(false);
   const addButtonRef = useRef<View>(null);
   const { height: windowHeight } = useWindowDimensions();
+  const [selectedVariant, setSelectedVariant] = useState(variants[0].id);
+  const { addItem } = useCartStore();
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (!addButtonRef.current) return;
@@ -36,8 +50,23 @@ const ProductDetails = () => {
   };
 
   const handleAddToCart = () => {
-    // Add to cart logic
-    console.log('Add to cart');
+    // Get the selected variant value
+    const selectedVariantValue = variants.find(v => v.id === selectedVariant)?.value || '';
+    
+    // Add the product to cart
+    addItem({
+      id: `${productData.id}-${selectedVariantValue}`,
+      title: productData.title,
+      price: productData.price,
+      image: productData.image,
+      variant: selectedVariantValue
+    });
+    
+    // Provide haptic feedback
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    
+    // Navigate to cart (optional)
+    // router.push('/(tabs)/cart');
   };
 
   return (
@@ -45,36 +74,36 @@ const ProductDetails = () => {
       <GenericScrollView onScroll={handleScroll} scrollEventThrottle={16}>
         <ProductImageCarousel showDots width={Dimensions.get("window").width} />
         <View style={styles.productDetailContainer}>
-          <View>
-            <ThemedText style={styles.productTitle}>Tie-Belt Shirt Dress</ThemedText>
-            <ThemedText type='title'>Rs. 1,999.00</ThemedText>
-            <ThemedText type='subtitle' style={styles.productTaxStatus}>Mrp inclusive of all taxes</ThemedText>
-          </View>
-          <View style={{marginTop: 48, marginBottom: 30}}>
-            <VariantSelector variantTitle='SELECT SIZES' options={variants} selectedValue='2' onSelect={() => {}} />
-            <SizeGuide />
-          </View>
-          <View ref={addButtonRef}>
-            <Button title='ADD' onPress={handleAddToCart} fullWidth />
-          </View>
-          <View style={{marginVertical: 50}}>
-            <Accordion title='DESCRIPTION & FIT' >
-              <ThemedText>Hello world</ThemedText>
-            </Accordion>
-            <Accordion title='DELIVERY & PAYMENT' >
-              <ThemedText>Hello world</ThemedText>
-            </Accordion>
-          </View>
-          <View>
-            <ThemedText type='title' style={{marginBottom: 20}}>Others Also Bought</ThemedText>
-            <FlatList
-              data={[1, 2, 3, 4, 5]}
-              horizontal
-              renderItem={({item}) => (
-                <ProductCard width={Dimensions.get("window").width / 2.5} />
-              )}
-              showsHorizontalScrollIndicator={false}
-            />
+        <View>
+          <ThemedText style={styles.productTitle}>{productData.title}</ThemedText>
+          <ThemedText type='title'>Rs. {productData.price.toFixed(2)}</ThemedText>
+          <ThemedText type='subtitle' style={styles.productTaxStatus}>Mrp inclusive of all taxes</ThemedText>
+        </View>
+        <View style={{marginTop: 48, marginBottom: 30}}>
+          <VariantSelector variantTitle='SELECT SIZES' options={variants} selectedValue={selectedVariant} onSelect={setSelectedVariant} />
+          <SizeGuide />
+        </View>
+        <View ref={addButtonRef}>
+          <Button title='ADD TO CART' onPress={handleAddToCart} fullWidth />
+        </View>
+        <View style={{marginVertical: 50}}>
+          <Accordion title='DESCRIPTION & FIT' >
+            <ThemedText>{productData.description}</ThemedText>
+          </Accordion>
+          <Accordion title='DELIVERY & PAYMENT' >
+            <ThemedText>Free delivery on orders above Rs. 999. Cash on delivery available.</ThemedText>
+          </Accordion>
+        </View>
+        <View>
+          <ThemedText type='title' style={{marginBottom: 20}}>Others Also Bought</ThemedText>
+          <FlatList
+            data={[1, 2, 3, 4, 5]}
+            horizontal
+            renderItem={({item}) => (
+              <ProductCard width={Dimensions.get("window").width / 2.5} />
+            )}
+            showsHorizontalScrollIndicator={false}
+          />
           </View>
         </View>
         <Footer />

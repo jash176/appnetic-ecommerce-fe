@@ -14,7 +14,7 @@ interface IProductImageCarousel {
 }
 
 const ProductImageCarousel = (props: IProductImageCarousel) => {
-  const {width = Dimensions.get("window").width / 2} = props;
+  const {width = Dimensions.get("window").width / 2, showDots = false} = props;
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const onScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -31,17 +31,17 @@ const ProductImageCarousel = (props: IProductImageCarousel) => {
             <Image source={{uri: item}} style={[styles.image, {width}]} />
           )
         }}
-        onMomentumScrollEnd={onScrollEnd}
+        onMomentumScrollEnd={showDots ? onScrollEnd : undefined}
         horizontal
         pagingEnabled
       />
-      <View style={styles.dotContainer}>
+      {showDots && <View style={styles.dotContainer}>
         {images.map((_, i) => {
           return(
             <View key={`dot_${i}`} style={currentIndex === i ? styles.activeDot : styles.inactiveDot} />
           )
         })}
-      </View>
+      </View>}
     </View>
   )
 }

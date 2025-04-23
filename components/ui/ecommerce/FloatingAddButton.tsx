@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Dimensions, Platform } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -18,7 +18,7 @@ const FloatingAddButton = ({ onPress, visible }: FloatingAddButtonProps) => {
   if (!visible) return null;
 
   return (
-    <View style={[styles.container, { bottom: safeAreaBottom + 16 }]}>
+    <View style={[styles.container, { bottom: Platform.OS === 'ios' ? 20 : safeAreaBottom + 16 }]}>
       <TouchableOpacity
         style={[styles.button, { backgroundColor }]}
         onPress={onPress}

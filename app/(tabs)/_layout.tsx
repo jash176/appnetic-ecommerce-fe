@@ -38,6 +38,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="search"
+        options={{
+          title: 'Search',
+          tabBarIcon: ({ focused }) => (
+            <Ionicons 
+              name="search-outline" 
+              size={20} 
+              color={focused ? "#000" : "#9e9e9e"} 
+            />
+          ),
+          tabBarLabel: () => null,
+        }}
+      />
+      <Tabs.Screen
         name="cart"
         options={{
           title: 'Cart',

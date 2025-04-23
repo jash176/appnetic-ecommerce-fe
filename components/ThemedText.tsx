@@ -33,13 +33,15 @@ const styles = StyleSheet.create({
   default: {
     fontSize: 16,
     lineHeight: 24,
+    fontFamily: "DMSans_400Regular",
   },
   heading: {
-    fontSize: 32,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontSize: 36,
+    fontFamily: "Montserrat_700Bold",
     marginBottom: 48,
     marginTop: 24,
-    marginHorizontal: 16
+    marginHorizontal: 16,
+    lineHeight: 46
   },
   title: {
     fontSize: 16,
@@ -52,7 +54,8 @@ const styles = StyleSheet.create({
   link: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#0a7ea4',
+    color: '#000000',
+    fontFamily: "DMSans_400Regular",
     textDecorationLine: 'underline',
   },
 });

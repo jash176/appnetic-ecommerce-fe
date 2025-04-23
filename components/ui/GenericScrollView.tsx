@@ -1,14 +1,23 @@
-import { ScrollView, StyleSheet } from 'react-native'
+import { ScrollView, StyleSheet, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
 import React from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 interface GenericScrollViewProps {
   children: React.ReactNode;
+  onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  scrollEventThrottle?: number;
 }
+
 const GenericScrollView = (props: GenericScrollViewProps) => {
-  const { children } = props;
-  const { top: paddingTop, bottom: paddingBottom } = useSafeAreaInsets()
+  const { children, onScroll, scrollEventThrottle } = props;
+  const { top: paddingTop } = useSafeAreaInsets()
   return (
-    <ScrollView style={[styles.container, { paddingTop, paddingBottom }]}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={{ paddingTop, paddingBottom: 90 }}
+      onScroll={onScroll}
+      scrollEventThrottle={scrollEventThrottle}
+    >
       {children}
     </ScrollView>
   )
@@ -18,6 +27,7 @@ export default GenericScrollView
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flexGrow: 1,
+    backgroundColor: "#FFF"
   }
 })

@@ -28,7 +28,7 @@ export default function ProductList({
   };
   
   // Fetch products using React Query
-  const { data, isLoading, isError } = useProducts(queryParams);
+  const { data, isLoading, isError } = useProducts();
   
   if (isLoading) {
     return (

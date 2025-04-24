@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import apiClient from '@/lib/api/client';
+import payloadClient, { createAuthenticatedClient } from '@/lib/api/payloadClient';
 
 interface User {
   id: string;
@@ -13,10 +13,11 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
   
   // Actions
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<boolean>;
   register: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>;
   checkAuthState: () => Promise<void>;
   clearError: () => void;
@@ -27,48 +28,63 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   token: null,
   isLoading: false,
   error: null,
+  isAuthenticated: false,
   
   login: async (email: string, password: string) => {
     try {
       set({ isLoading: true, error: null });
       
-      // Call PayloadCMS login endpoint
-      const response = await apiClient.post('/users/login', {
+      // Use payload client for login
+      const response = await payloadClient.collections.users.login({
         email,
         password,
       });
       
-      const { user, token } = response.data;
-      
-      // Store token securely in a real app
-      // await SecureStore.setItemAsync('auth_token', token);
-      
+      // Store token and user data
       set({
-        user,
-        token,
+        isAuthenticated: true,
+        token: response.token,
+        user: response.user,
         isLoading: false,
       });
+      
+      return true;
     } catch (error: any) {
       set({
         isLoading: false,
-        error: error.response?.data?.message || 'Login failed',
+        error: error.message || 'Failed to login',
       });
+      return false;
     }
   },
   
-  logout: () => {
-    // Clear token from secure storage in a real app
-    // await SecureStore.deleteItemAsync('auth_token');
-    
-    // Call PayloadCMS logout endpoint
-    apiClient.post('/users/logout').catch(() => {
-      // Silently fail on logout errors
-    });
-    
-    set({
-      user: null,
-      token: null,
-    });
+  logout: async () => {
+    try {
+      set({ isLoading: true });
+      
+      // Get the current token to create an authenticated client
+      const token = get().token;
+      if (token) {
+        const client = createAuthenticatedClient(token);
+        await client.collections.users.logout({});
+      }
+      
+      // Clear auth state
+      set({
+        isAuthenticated: false,
+        token: null,
+        user: null,
+        isLoading: false,
+      });
+      
+      return true;
+    } catch (error: any) {
+      set({
+        isLoading: false,
+        error: error.message || 'Failed to logout',
+      });
+      return false;
+    }
   },
   
   register: async (email: string, password: string, firstName?: string, lastName?: string) => {
@@ -76,7 +92,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: true, error: null });
       
       // Call PayloadCMS register endpoint
-      await apiClient.post('/users', {
+      await payloadClient.collections.users.create({
         email,
         password,
         firstName,
@@ -88,7 +104,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error: any) {
       set({
         isLoading: false,
-        error: error.response?.data?.message || 'Registration failed',
+        error: error.message || 'Registration failed',
       });
     }
   },
@@ -97,19 +113,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      // Get token from secure storage in a real app
-      // const token = await SecureStore.getItemAsync('auth_token');
+      // Get token from store
+      const token = get().token;
       
-      if (!get().token) {
+      if (!token) {
         set({ isLoading: false });
         return;
       }
       
       // Verify token and get user data
-      const response = await apiClient.get('/users/me');
+      const client = createAuthenticatedClient(token);
+      const response = await client.collections.users.me({});
       
       set({
-        user: response.data.user,
+        user: response.user,
         isLoading: false,
       });
     } catch (error) {

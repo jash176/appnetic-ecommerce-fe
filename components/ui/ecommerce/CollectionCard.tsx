@@ -1,6 +1,7 @@
-import { Dimensions, Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Dimensions, Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { ThemedText } from '@/components/ThemedText';
+import { useFeaturedCollection } from '@/lib/api/hooks/useCollections';
 
 interface CollectionCardProps {
   title: string;
@@ -9,15 +10,21 @@ interface CollectionCardProps {
 }
 
 const CollectionCard = (props: CollectionCardProps) => {
+  const storeId = 1;
+  const featuredSlug = "featured-collection"
+  const { data: collection, isLoading: collectionLoading, isError: collectionError } = useFeaturedCollection(storeId, featuredSlug);
   const { width = Dimensions.get("window").width, onPress, title } = props;
+  if(!collection) return null;
+  if(collectionLoading) return <ActivityIndicator />;
+  console.log("Collection : ", collection)
   return (
     <Pressable onPress={onPress}>
       <Image
-        source={{uri: "https://image.hm.com/content/dam/global_campaigns/season_01/women/startpage-assets/wk16/Tops-2x3-4-CE-Women-wk16.jpg?imwidth=657"}}
+        source={{uri: `http://10.2.0.0:3000/${collection.image.url}`}}
         style={[styles.collectionImage, {width}]}
       />
       <View style={styles.infoContainer}>
-        <ThemedText type='heading' style={styles.title}>{title}</ThemedText>
+        <ThemedText type='heading' style={styles.title}>{collection.title}</ThemedText>
         <TouchableOpacity>
           <ThemedText type='link' style={styles.btnShopNow}>{"SHOP NOW"}</ThemedText>
         </TouchableOpacity>

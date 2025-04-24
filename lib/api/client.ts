@@ -1,10 +1,15 @@
+/**
+ * OBSOLETE: This file is no longer needed as we've moved to using the Payload REST client directly.
+ * See lib/api/payloadClient.ts for the new implementation.
+ */
+
 import axios from 'axios';
 
 /**
  * Base API client for making requests to PayloadCMS
  */
 const apiClient = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://10.2.2.0:3000/api',
+  baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3000/api',
   headers: {
     'Content-Type': 'application/json',
   },

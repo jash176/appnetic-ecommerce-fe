@@ -1,3 +1,8 @@
+/**
+ * OBSOLETE: This file is no longer needed as we've moved to using the Payload REST client directly.
+ * See lib/api/hooks/useProducts.ts and lib/api/payloadClient.ts for the new implementation.
+ */
+
 import apiClient from '../client';
 import { Product } from './types';
 

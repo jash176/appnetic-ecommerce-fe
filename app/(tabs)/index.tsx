@@ -3,8 +3,6 @@ import CategoryCard from '@/components/ui/ecommerce/CategoryCard';
 import GenericScrollView from '@/components/ui/GenericScrollView';
 import CollectionCard from '@/components/ui/ecommerce/CollectionCard';
 import FeaturedProduct from '@/components/ui/ecommerce/FeaturedProduct';
-import Accordion from '@/components/ui/Accordion';
-import { ThemedText } from '@/components/ThemedText';
 import Footer from '@/components/ui/Footer';
 
 export default function HomeScreen() {
@@ -12,15 +10,16 @@ export default function HomeScreen() {
     <GenericScrollView>
       <CollectionCard title={"RIVERA\nMOOD"} />
       <FeaturedProduct price='Rs. 1,999.00' />
-        <View style={{flexDirection: 'row', marginTop: 70}}>
-          <CategoryCard title='TOPS' />
-          <CategoryCard title='LINEN' />
-        </View>
-        <View style={{flexDirection: 'row', marginTop: 70}}>
-          <CategoryCard title='TOPS' />
-          <CategoryCard title='LINEN' />
-        </View>
-        <Footer />
+      
+      <View style={{flexDirection: 'row', marginTop: 70}}>
+        <CategoryCard title='TOPS' />
+        <CategoryCard title='LINEN' />
+      </View>
+      <View style={{flexDirection: 'row', marginTop: 70}}>
+        <CategoryCard title='TOPS' />
+        <CategoryCard title='LINEN' />
+      </View>
+      <Footer />
     </GenericScrollView>
   );
 }

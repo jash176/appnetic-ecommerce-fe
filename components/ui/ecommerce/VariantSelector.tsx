@@ -3,14 +3,24 @@ import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 
 interface VariantOption {
-  id: string;
-  label: string;
-  value: string;
-  disabled?: boolean;
+  title: string;
+  price: number;
+  compareAtPrice?: number | null;
+  sku?: string | null;
+  inventory?: {
+    trackInventory?: boolean | null;
+    quantity?: number | null;
+  };
+  options?: {
+    name: string;
+    value: string;
+    id?: string | null;
+  }[] | null;
+  id?: string | null;
 }
 
 interface VariantSelectorProps {
-  options: VariantOption[];
+  options: VariantOption[] | null | undefined;
   selectedValue?: string;
   onSelect: (value: string) => void;
   variantTitle?: string;
@@ -24,6 +34,7 @@ const VariantSelector = ({
   onSelect,
   variantTitle,
 }: VariantSelectorProps) => {
+  if(!options || options.length <= 0) return null;
   return (
     <View style={styles.container}>
       {variantTitle && (
@@ -31,28 +42,33 @@ const VariantSelector = ({
           {variantTitle}
         </ThemedText>
       )}
-       <View style={styles.wrapper}>
-      {options.map((size, index) => {
-        const row = Math.floor(index / BOX_PER_ROW);
-        const col = index % BOX_PER_ROW;
-        const isFirstCol = col === 0;
-        const isFirsRow = row === 0
-        return(
-        <TouchableOpacity
-          key={index}
-          style={[
-            styles.box,
-            isFirstCol && { borderLeftWidth: 1 },
-            isFirsRow && {borderTopWidth: 1},
-            selectedValue === size.id && styles.selectedBox,
-          ]}
-          onPress={() => onSelect(size.id)}
-          activeOpacity={0.7}
-        >
-          <ThemedText>{size.label}</ThemedText>
-        </TouchableOpacity>
-      )})}
-    </View>
+      <View style={styles.wrapper}>
+        {options.map((size, index) => {
+          const row = Math.floor(index / BOX_PER_ROW);
+          const col = index % BOX_PER_ROW;
+          const isFirstCol = col === 0;
+          const isFirsRow = row === 0
+          return (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.box,
+                isFirstCol && { borderLeftWidth: 1 },
+                isFirsRow && { borderTopWidth: 1 },
+                selectedValue === size.id && styles.selectedBox,
+              ]}
+              onPress={() => {
+                if(size.id) {
+                  onSelect(size.id)
+                }
+              }}
+              activeOpacity={0.7}
+            >
+              <ThemedText>{size.title}</ThemedText>
+            </TouchableOpacity>
+          )
+        })}
+      </View>
     </View>
   );
 };
@@ -64,7 +80,7 @@ const styles = StyleSheet.create({
   variantTitle: {
     marginBottom: 8,
   },
-  
+
   wrapper: {
     flexDirection: 'row',
     flexWrap: 'wrap',

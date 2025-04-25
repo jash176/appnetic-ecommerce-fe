@@ -11,8 +11,9 @@ import Accordion from '@/components/ui/Accordion'
 import ProductCard from '@/components/ui/ecommerce/ProductCard'
 import FloatingAddButton from '@/components/ui/ecommerce/FloatingAddButton'
 import { useCartStore } from '@/store/cartStore'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import * as Haptics from 'expo-haptics'
+import { useProduct } from '@/lib/api/hooks/useProducts'
 
 const variants = [
   { id: "1", label: "XSS", value: "XSS" },
@@ -34,6 +35,8 @@ const productData = {
 }
 
 const ProductDetails = () => {
+  const { id } = useLocalSearchParams();
+  const { data, isLoading, isError, refetch } = useProduct(parseInt(id as string))
   const [isAddButtonVisible, setIsAddButtonVisible] = useState(false);
   const addButtonRef = useRef<View>(null);
   const { height: windowHeight } = useWindowDimensions();
@@ -54,13 +57,13 @@ const ProductDetails = () => {
     const selectedVariantValue = variants.find(v => v.id === selectedVariant)?.value || '';
     
     // Add the product to cart
-    addItem({
-      id: `${productData.id}-${selectedVariantValue}`,
-      title: productData.title,
-      price: productData.price,
-      image: productData.image,
-      variant: selectedVariantValue
-    });
+    // addItem({
+    //   id: `${productData.id}-${selectedVariantValue}`,
+    //   title: productData.title,
+    //   price: productData.price,
+    //   image: productData.image,
+    //   variant: selectedVariantValue
+    // });
     
     // Provide haptic feedback
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -69,18 +72,20 @@ const ProductDetails = () => {
     // router.push('/(tabs)/cart');
   };
 
+  if(!data) return null;
+
   return (
     <View style={styles.container}>
       <GenericScrollView onScroll={handleScroll} scrollEventThrottle={16}>
-        <ProductImageCarousel showDots width={Dimensions.get("window").width} />
+        <ProductImageCarousel images={data.images} showDots width={Dimensions.get("window").width} />
         <View style={styles.productDetailContainer}>
         <View>
-          <ThemedText style={styles.productTitle}>{productData.title}</ThemedText>
-          <ThemedText type='title'>Rs. {productData.price.toFixed(2)}</ThemedText>
+          <ThemedText style={styles.productTitle}>{data.title}</ThemedText>
+          <ThemedText type='title'>Rs. {data.price.toFixed(2)}</ThemedText>
           <ThemedText type='subtitle' style={styles.productTaxStatus}>Mrp inclusive of all taxes</ThemedText>
         </View>
         <View style={{marginTop: 48, marginBottom: 30}}>
-          <VariantSelector variantTitle='SELECT SIZES' options={variants} selectedValue={selectedVariant} onSelect={setSelectedVariant} />
+          <VariantSelector variantTitle='SELECT SIZES' options={data.variants} selectedValue={selectedVariant} onSelect={setSelectedVariant} />
           <SizeGuide />
         </View>
         <View ref={addButtonRef}>

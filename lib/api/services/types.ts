@@ -78,6 +78,7 @@ export interface Config {
     'customer-tags': CustomerTag;
     discounts: Discount;
     collections: Collection;
+    home_layouts: HomeLayout;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -95,6 +96,7 @@ export interface Config {
     'customer-tags': CustomerTagsSelect<false> | CustomerTagsSelect<true>;
     discounts: DiscountsSelect<false> | DiscountsSelect<true>;
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
+    home_layouts: HomeLayoutsSelect<false> | HomeLayoutsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -500,7 +502,7 @@ export interface Collection {
     [k: string]: unknown;
   } | null;
   products?: (number | Product)[] | null;
-  image?: (number | null) | Media;
+  image?: null | Media;
   /**
    * Whether products are automatically added based on conditions
    */
@@ -545,6 +547,53 @@ export interface Collection {
     title?: string | null;
     description?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home_layouts".
+ */
+export interface HomeLayout {
+  id: number;
+  name: string;
+  store: number | Store;
+  /**
+   * Controls whether this layout is currently active
+   */
+  isActive?: boolean | null;
+  /**
+   * Collections to feature on the home page
+   */
+  featuredCollections?:
+    | {
+        collection: number | Collection;
+        /**
+         * Custom title for this collection (optional)
+         */
+        title: string;
+        description: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Individual products to feature on the home page
+   */
+  featuredProducts?:
+    | {
+        product: number | Product;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Categories to feature on the home page
+   */
+  categoryDisplay?:
+    | {
+        category: number | Category;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -598,6 +647,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'collections';
         value: number | Collection;
+      } | null)
+    | ({
+        relationTo: 'home_layouts';
+        value: number | HomeLayout;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -953,6 +1006,37 @@ export interface CollectionsSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home_layouts_select".
+ */
+export interface HomeLayoutsSelect<T extends boolean = true> {
+  name?: T;
+  store?: T;
+  isActive?: T;
+  featuredCollections?:
+    | T
+    | {
+        collection?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  featuredProducts?:
+    | T
+    | {
+        product?: T;
+        id?: T;
+      };
+  categoryDisplay?:
+    | T
+    | {
+        category?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

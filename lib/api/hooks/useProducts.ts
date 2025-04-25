@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import payloadClient, { createAuthenticatedClient } from '../payloadClient';
-import { Product } from '../services/types';
+import { Product, ProductsSelect } from '../services/types';
 import { useAuthStore } from '@/store/authStore';
 
 // Params type for product queries
@@ -11,25 +11,11 @@ type ProductParams = {
   where?: Record<string, any>;
 };
 
-// Simplified Result type that works with both our custom hooks and payload-rest-client
-type ProductResult = {
-  docs: Product[];
-  totalDocs?: number;
-  limit?: number;
-  totalPages?: number;
-  page?: number;
-  pagingCounter?: number;
-  hasPrevPage?: boolean;
-  hasNextPage?: boolean;
-  prevPage?: number | null;
-  nextPage?: number | null;
-};
-
 /**
  * Custom hook for fetching products
  */
 export function useProducts(params?: ProductParams) {
-  const [data, setData] = useState<ProductResult | null>(null);
+  const [data, setData] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const { token } = useAuthStore();
@@ -51,7 +37,8 @@ export function useProducts(params?: ProductParams) {
       if (params?.where) queryParams.where = params.where;
       
       const result = await client.collections.products.find(queryParams);
-      setData(result as any);
+      console.log("Result : ", JSON.stringify(result))
+      setData(result.docs);
     } catch (error) {
       console.error('Error fetching products:', error);
       setIsError(true);
@@ -114,7 +101,7 @@ export function useProductsByCategory(categoryId: number | undefined, params?: {
   page?: number;
   limit?: number;
 }) {
-  const [data, setData] = useState<ProductResult | null>(null);
+  const [data, setData] = useState<ProductsSelect | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const { token } = useAuthStore();
@@ -168,7 +155,7 @@ export function useSearchProducts(query: string | undefined, params?: {
   page?: number;
   limit?: number;
 }) {
-  const [data, setData] = useState<ProductResult | null>(null);
+  const [data, setData] = useState<ProductsSelect | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const { token } = useAuthStore();

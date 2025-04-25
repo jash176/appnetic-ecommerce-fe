@@ -1,24 +1,41 @@
-import { Image, StyleSheet, Platform, Text, ScrollView, View } from 'react-native';
+import { StyleSheet, View, FlatList } from 'react-native';
 import CategoryCard from '@/components/ui/ecommerce/CategoryCard';
 import GenericScrollView from '@/components/ui/GenericScrollView';
 import CollectionCard from '@/components/ui/ecommerce/CollectionCard';
 import FeaturedProduct from '@/components/ui/ecommerce/FeaturedProduct';
 import Footer from '@/components/ui/Footer';
+import { useHomeLayout } from '@/lib/api/hooks/useHomeLayout';
 
 export default function HomeScreen() {
+  const { data, isLoading } = useHomeLayout();
+  if (isLoading || !data) return null;
   return (
     <GenericScrollView>
-      <CollectionCard title={"RIVERA\nMOOD"} />
-      <FeaturedProduct price='Rs. 1,999.00' />
-      
-      <View style={{flexDirection: 'row', marginTop: 70}}>
-        <CategoryCard title='TOPS' />
-        <CategoryCard title='LINEN' />
-      </View>
-      <View style={{flexDirection: 'row', marginTop: 70}}>
-        <CategoryCard title='TOPS' />
-        <CategoryCard title='LINEN' />
-      </View>
+      {data.featuredCollections?.map((item, index) => {
+        return (
+          <CollectionCard key={`collection_${item.id}`} item={item} />
+        )
+      })}
+      {
+        data.featuredProducts?.map((item, index) => {
+          return (
+            <FeaturedProduct key={`product_${item.id}`} item={item} />
+          )
+        })
+      }
+      <FlatList
+        data={(data.categoryDisplay || []).slice(0, (data.categoryDisplay || []).length - ((data.categoryDisplay || []).length % 2))}
+        keyExtractor={item => `category_${item.id}`}
+        numColumns={2}
+        scrollEnabled={false}
+        contentContainerStyle={{ marginTop: 70 }}
+        renderItem={({ item }) => {
+          return (
+            <CategoryCard item={item} />
+          )
+        }}
+        ItemSeparatorComponent={() => <View style={{ marginTop: 70 }} />}
+      />
       <Footer />
     </GenericScrollView>
   );

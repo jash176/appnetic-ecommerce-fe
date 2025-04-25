@@ -1,30 +1,31 @@
 import { Dimensions, Image, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, View } from 'react-native'
 import React, { useState } from 'react'
 import { FlatList } from 'react-native-gesture-handler';
-
-const images = [
-  "https://image.hm.com/assets/hm/37/0f/370fc4c5154048a26541cf6801a5c71ba14fa47c.jpg?imwidth=820",
-  "https://image.hm.com/assets/hm/09/58/09589525fdfe2c7b755c0db044bca14d73267cc6.jpg?imwidth=820",
-  "https://image.hm.com/assets/hm/be/88/be8824b115e8e73bd91eb32926b7dcbc1eb377f3.jpg?imwidth=820"
-]
+import { Media } from '@/lib/api/services/types';
+import { getFullImageUrl } from '@/utils/functions';
 
 interface IProductImageCarousel {
   showDots?: boolean;
-  width?: number
+  width?: number;
+  images: { image: number | Media; alt: string; isPrimary?: boolean | null | undefined; id?: string | null | undefined; }[] | undefined | null
 }
 
 const ProductImageCarousel = (props: IProductImageCarousel) => {
-  const {width = Dimensions.get("window").width / 2, showDots = false} = props;
+  const {width = Dimensions.get("window").width / 2, showDots = false, images} = props;
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const onScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / width);
     setCurrentIndex(index);
   };
+  
   return (
     <View style={[{width}]}>
-      <FlatList
-        data={images}
+      {images && <FlatList
+        data={images.map(image => {
+          const imageObj = image.image as Media
+          return getFullImageUrl(imageObj.filename ?? "")
+        })}
         showsHorizontalScrollIndicator={false}
         renderItem={({item}) =>{ 
           return(
@@ -34,9 +35,9 @@ const ProductImageCarousel = (props: IProductImageCarousel) => {
         onMomentumScrollEnd={showDots ? onScrollEnd : undefined}
         horizontal
         pagingEnabled
-      />
+      />}
       {showDots && <View style={styles.dotContainer}>
-        {images.map((_, i) => {
+        {images && images.map((_, i) => {
           return(
             <View key={`dot_${i}`} style={currentIndex === i ? styles.activeDot : styles.inactiveDot} />
           )

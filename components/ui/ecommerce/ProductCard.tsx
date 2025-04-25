@@ -6,32 +6,21 @@ import ProductImageCarousel from './ProductImageCarousel';
 import { useCartStore } from '@/store/cartStore';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
+import { Media, Product } from '@/lib/api/services/types';
 
 interface ProductCardProps {
   width?: number;
   onPress?: () => void;
   showDots?: boolean;
-  product?: {
-    id: string;
-    title: string;
-    price: number;
-    image: string;
-  };
+  item: Product
 }
-
-const defaultProduct = {
-  id: "prod-default",
-  title: "Ballerina-neckline top",
-  price: 699.00,
-  image: "https://image.hm.com/content/dam/global_campaigns/season_01/women/startpage-assets/wk16/DS21G-2x3-women-startpage-wk16.jpg?imwidth=320"
-};
 
 const ProductCard = (props: ProductCardProps) => {
   const {
     width = Dimensions.get("window").width / 2, 
     onPress, 
     showDots = false,
-    product = defaultProduct
+    item
   } = props;
   
   const [liked, setLiked] = useState(false);
@@ -50,20 +39,22 @@ const ProductCard = (props: ProductCardProps) => {
     e.stopPropagation();
     
     // Add to cart with default variant
-    addItem({
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      image: product.image,
-    });
+    // addItem({
+    //   id: product.id,
+    //   title: product.title,
+    //   price: product.price,
+    //   image: product.image,
+    // });
     
     // Provide haptic feedback
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
+  if(!item) return null;
+
   return (
     <TouchableOpacity style={{width}} activeOpacity={0.9} onPress={handlePress}>
-      <ProductImageCarousel width={width} showDots={showDots} />
+      <ProductImageCarousel images={item.images} width={width} showDots={showDots} />
       <View style={styles.heartContainer}>
         <TouchableOpacity onPress={(e) => {
           e.stopPropagation();
@@ -73,9 +64,9 @@ const ProductCard = (props: ProductCardProps) => {
         </TouchableOpacity>
       </View>
       <View style={styles.infoContainer}>
-        <ThemedText numberOfLines={1} type='title' style={styles.title}>{product.title}</ThemedText>
+        <ThemedText numberOfLines={1} type='title' style={styles.title}>{item.title}</ThemedText>
         <View style={styles.priceRow}>
-          <ThemedText numberOfLines={1} type='title'>Rs. {product.price.toFixed(2)}</ThemedText>
+          <ThemedText numberOfLines={1} type='title'>Rs. {item.price.toFixed(2)}</ThemedText>
           <TouchableOpacity 
             style={styles.addToCartButton}
             onPress={handleAddToCart}

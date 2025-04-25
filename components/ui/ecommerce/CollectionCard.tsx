@@ -1,30 +1,33 @@
-import { ActivityIndicator, Dimensions, Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { ThemedText } from '@/components/ThemedText';
-import { useFeaturedCollection } from '@/lib/api/hooks/useCollections';
+import { Collection, Media } from '@/lib/api/services/types';
+import { getFullImageUrl } from '@/utils/functions';
 
 interface CollectionCardProps {
-  title: string;
+  item: {
+    collection: number | Collection;
+    title: string;
+    description: string;
+    id?: string | null;
+  }
   width?: number;
   onPress?: () => void;
 }
 
 const CollectionCard = (props: CollectionCardProps) => {
-  const storeId = 1;
-  const featuredSlug = "featured-collection"
-  const { data: collection, isLoading: collectionLoading, isError: collectionError } = useFeaturedCollection(storeId, featuredSlug);
-  const { width = Dimensions.get("window").width, onPress, title } = props;
-  if(!collection) return null;
-  if(collectionLoading) return <ActivityIndicator />;
-  console.log("Collection : ", collection)
+  const {item, onPress, width} = props;
+  const collection = item.collection as Collection
+  const image = collection.image as Media
+  console.log("item?.collection.image?.url : ", getFullImageUrl(image.filename as string))
   return (
     <Pressable onPress={onPress}>
       <Image
-        source={{uri: `http://10.2.0.0:3000/${collection.image.url}`}}
+        source={{uri: getFullImageUrl(image.filename as string)}}
         style={[styles.collectionImage, {width}]}
       />
       <View style={styles.infoContainer}>
-        <ThemedText type='heading' style={styles.title}>{collection.title}</ThemedText>
+        <ThemedText type='heading' style={styles.title}>{item?.title}</ThemedText>
         <TouchableOpacity>
           <ThemedText type='link' style={styles.btnShopNow}>{"SHOP NOW"}</ThemedText>
         </TouchableOpacity>

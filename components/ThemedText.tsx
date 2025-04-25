@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     marginBottom: 48,
     marginTop: 24,
     marginHorizontal: 16,
-    lineHeight: 46
+    // lineHeight: 46
   },
   title: {
     fontSize: 16,

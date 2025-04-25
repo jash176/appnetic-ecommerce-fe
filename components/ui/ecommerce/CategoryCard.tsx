@@ -1,23 +1,30 @@
-import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Dimensions, Image, Pressable, StyleSheet, View } from 'react-native'
 import React from 'react'
 import { ThemedText } from '@/components/ThemedText';
+import { Category, Media } from '@/lib/api/services/types';
+import { getFullImageUrl } from '@/utils/functions';
 
 interface CategoryCardProps {
-  title: string;
+  item: {
+    category: number | Category;
+    id?: string | null;
+}
   width?: number;
   onPress?: () => void;
 }
 
 const CategoryCard = (props: CategoryCardProps) => {
-  const {width = Dimensions.get("window").width / 2, onPress, title } = props;
+  const {width = Dimensions.get("window").width / 2, onPress, item } = props;
+  const category = item.category as Category;
+  const image = category.image as Media
   return (
     <Pressable onPress={onPress}>
       <Image
-        source={{uri: "https://image.hm.com/content/dam/global_campaigns/season_01/women/startpage-assets/wk16/Tops-2x3-4-CE-Women-wk16.jpg?imwidth=657"}}
+        source={{uri: getFullImageUrl(image.filename as string)}}
         style={[styles.categoryImage, {width}]}
       />
       <View style={styles.infoContainer}>
-        <ThemedText type='title'>{title}</ThemedText>
+        <ThemedText type='title'>{category.name}</ThemedText>
         <ThemedText style={styles.exploreText} type='subtitle'>EXPLORE</ThemedText>
       </View>
     </Pressable>

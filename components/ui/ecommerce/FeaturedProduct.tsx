@@ -1,24 +1,32 @@
 import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { ThemedText } from '@/components/ThemedText';
+import { getFullImageUrl } from '@/utils/functions';
+import { Media, Product } from '@/lib/api/services/types';
 
 interface FeaturedProductProps {
-  price: string;
+  item: {
+    product: number | Product;
+    id?: string | null;
+}
   width?: number;
   onPress?: () => void;
 }
 
 const FeaturedProduct = (props: FeaturedProductProps) => {
-  const {price, onPress, width} = props
+  const {item, onPress, width} = props;
+  const product = item.product as Product;
+  const image = product.images ? product.images[0].image as Media : null
+  if(!product) return null;
   return (
     <Pressable onPress={onPress}>
       <Image
-        source={{uri: "https://image.hm.com/content/dam/global_campaigns/season_01/women/startpage-assets/wk16/DS21G-2x3-women-startpage-wk16.jpg?imwidth=320"}}
+        source={{uri: getFullImageUrl(image?.filename as string)}}
         style={[styles.collectionImage, {width}]}
       />
       <View style={styles.priceContainer}>
       <TouchableOpacity>
-          <ThemedText type='title' style={styles.btnShopNow}>{price}</ThemedText>
+          <ThemedText type='title' style={styles.btnShopNow}>Rs. {product.price.toFixed(2)}</ThemedText>
         </TouchableOpacity>
       </View>
     </Pressable>

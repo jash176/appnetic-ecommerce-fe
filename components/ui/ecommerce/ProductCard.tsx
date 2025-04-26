@@ -31,7 +31,7 @@ const ProductCard = (props: ProductCardProps) => {
       onPress();
     } else {
       // Navigate to product details
-      router.push('/product-details');
+      router.push(`/${item.id}`);
     }
   };
 
@@ -50,6 +50,9 @@ const ProductCard = (props: ProductCardProps) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
+  // Check if there's a compare price available
+  const hasComparePrice = item.compareAtPrice && item.compareAtPrice > item.price;
+
   if(!item) return null;
 
   return (
@@ -66,7 +69,20 @@ const ProductCard = (props: ProductCardProps) => {
       <View style={styles.infoContainer}>
         <ThemedText numberOfLines={1} type='title' style={styles.title}>{item.title}</ThemedText>
         <View style={styles.priceRow}>
-          <ThemedText numberOfLines={1} type='title'>Rs. {item.price.toFixed(2)}</ThemedText>
+          <View style={styles.priceContainer}>
+            {hasComparePrice && (
+              <ThemedText numberOfLines={1} style={styles.comparePrice}>
+                Rs. {item.compareAtPrice?.toFixed(2)}
+              </ThemedText>
+            )}
+            <ThemedText 
+              numberOfLines={1} 
+              type='title' 
+              style={hasComparePrice ? styles.salePrice : undefined}
+            >
+              Rs. {item.price.toFixed(2)}
+            </ThemedText>
+          </View>
           <TouchableOpacity 
             style={styles.addToCartButton}
             onPress={handleAddToCart}
@@ -99,6 +115,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 4
+  },
+  priceContainer: {
+    flexDirection: 'column',
+  },
+  comparePrice: {
+    textDecorationLine: 'line-through',
+    color: '#888',
+    fontSize: 12,
+  },
+  salePrice: {
+    color: '#EE3434',
   },
   addToCartButton: {
     padding: 8,

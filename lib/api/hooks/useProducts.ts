@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import payloadClient, { createAuthenticatedClient } from '../payloadClient';
 import { Product, ProductsSelect } from '../services/types';
 import { useAuthStore } from '@/store/authStore';
+import { Config, FindParams } from 'payload-rest-client/dist/types';
+import { useLoadingStore } from '@/hooks/useLoading';
 
 // Params type for product queries
 type ProductParams = {
@@ -15,6 +17,7 @@ type ProductParams = {
  * Custom hook for fetching products
  */
 export function useProducts(params?: ProductParams) {
+  const { showLoading, hideLoading } = useLoadingStore();
   const [data, setData] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -25,15 +28,15 @@ export function useProducts(params?: ProductParams) {
     setIsError(false);
     
     try {
+      showLoading("Loading products...")
       const client = token 
         ? createAuthenticatedClient(token) 
         : payloadClient;
       
-      const queryParams: any = {};
+      const queryParams: FindParams<Config, any, Product, unknown, ProductsSelect<false> | ProductsSelect<true>> | undefined = {};
       
       if (params?.page) queryParams.page = params.page;
       if (params?.limit) queryParams.limit = params.limit;
-      if (params?.sort) queryParams.sort = params.sort;
       if (params?.where) queryParams.where = params.where;
       
       const result = await client.collections.products.find(queryParams);
@@ -44,6 +47,7 @@ export function useProducts(params?: ProductParams) {
       setIsError(true);
     } finally {
       setIsLoading(false);
+      hideLoading();
     }
   }, [params, token]);
   
@@ -58,6 +62,7 @@ export function useProducts(params?: ProductParams) {
  * Custom hook for fetching a single product by ID
  */
 export function useProduct(id: number | undefined) {
+  const { showLoading, hideLoading } = useLoadingStore();
   const [data, setData] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -68,7 +73,7 @@ export function useProduct(id: number | undefined) {
       setIsLoading(false);
       return;
     }
-    
+    showLoading("Loading details...")
     setIsLoading(true);
     setIsError(false);
     
@@ -84,6 +89,7 @@ export function useProduct(id: number | undefined) {
       setIsError(true);
     } finally {
       setIsLoading(false);
+      hideLoading();
     }
   }, [id, token]);
   

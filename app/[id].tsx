@@ -72,8 +72,10 @@ const ProductDetails = () => {
     // router.push('/(tabs)/cart');
   };
 
+  
   if(!data) return null;
-
+  
+  const hasComparePrice = data.compareAtPrice && data.compareAtPrice > data.price;
   return (
     <View style={styles.container}>
       <GenericScrollView onScroll={handleScroll} scrollEventThrottle={16}>
@@ -81,7 +83,20 @@ const ProductDetails = () => {
         <View style={styles.productDetailContainer}>
         <View>
           <ThemedText style={styles.productTitle}>{data.title}</ThemedText>
-          <ThemedText type='title'>Rs. {data.price.toFixed(2)}</ThemedText>
+          <View style={styles.priceContainer}>
+            {hasComparePrice && (
+              <ThemedText numberOfLines={1} style={styles.comparePrice}>
+                Rs. {data.compareAtPrice?.toFixed(2)}
+              </ThemedText>
+            )}
+            <ThemedText 
+              numberOfLines={1} 
+              type='title' 
+              style={hasComparePrice ? styles.salePrice : undefined}
+            >
+              Rs. {data.price.toFixed(2)}
+            </ThemedText>
+          </View>
           <ThemedText type='subtitle' style={styles.productTaxStatus}>Mrp inclusive of all taxes</ThemedText>
         </View>
         <View style={{marginTop: 48, marginBottom: 30}}>
@@ -99,17 +114,6 @@ const ProductDetails = () => {
             <ThemedText>Free delivery on orders above Rs. 999. Cash on delivery available.</ThemedText>
           </Accordion>
         </View>
-        <View>
-          <ThemedText type='title' style={{marginBottom: 20}}>Others Also Bought</ThemedText>
-          <FlatList
-            data={[1, 2, 3, 4, 5]}
-            horizontal
-            renderItem={({item}) => (
-              <ProductCard width={Dimensions.get("window").width / 2.5} />
-            )}
-            showsHorizontalScrollIndicator={false}
-          />
-          </View>
         </View>
         <Footer />
       </GenericScrollView>
@@ -133,5 +137,18 @@ const styles = StyleSheet.create({
   },
   productTaxStatus: {
     textTransform: "uppercase"
-  }
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: "center"
+  },
+  comparePrice: {
+    textDecorationLine: 'line-through',
+    color: '#888',
+    fontSize: 12,
+  },
+  salePrice: {
+    color: '#EE3434',
+    marginLeft: 10
+  },
 })

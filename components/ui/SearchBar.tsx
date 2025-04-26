@@ -20,10 +20,9 @@ const SearchBar = ({
   const textColor = useThemeColor({}, 'text');
   const placeholderColor = useThemeColor({}, 'tabIconDefault');
 
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
+  const handleSearch = () => {
     if (onSearch) {
-      onSearch(text);
+      onSearch(searchQuery);
     }
   };
 
@@ -48,9 +47,10 @@ const SearchBar = ({
           placeholder={placeholder}
           placeholderTextColor={placeholderColor}
           value={searchQuery}
-          onChangeText={handleSearch}
+          onChangeText={setSearchQuery}
           returnKeyType="search"
           clearButtonMode="while-editing"
+          onSubmitEditing={handleSearch}
         />
         {searchQuery.length > 0 && Platform.OS !== 'ios' && (
           <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>

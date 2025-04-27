@@ -5,9 +5,15 @@ import { ThemedText } from '@/components/ThemedText'
 import { Ionicons } from '@expo/vector-icons'
 import Button from '@/components/ui/ecommerce/Button'
 import GenericScrollView from '@/components/ui/GenericScrollView'
+import { router } from 'expo-router'
+import { getFullImageUrl } from '@/utils/functions'
 
 const Cart = () => {
   const { items, removeItem, updateQuantity, getSubtotal, clearCart } = useCartStore()
+
+  const handleCheckout = () => {
+    router.push('/checkout');
+  };
 
   const renderEmptyCart = () => (
     <View style={styles.emptyContainer}>
@@ -20,11 +26,11 @@ const Cart = () => {
   const renderCartItem = ({ item }: { item: Product }) => (
     <View style={styles.cartItem}>
       <Image 
-        source={{ uri: item.image }} 
+        source={{ uri: getFullImageUrl(item.image as string) }} 
         style={styles.itemImage}
       />
       <View style={styles.itemInfo}>
-        <ThemedText type="title" numberOfLines={1}>{item.title}</ThemedText>
+        <ThemedText type="title" numberOfLines={1}>{item.productTitle}</ThemedText>
         <ThemedText>Rs. {item.price.toFixed(2)}</ThemedText>
         {item.variant && <ThemedText style={styles.variant}>Size: {item.variant}</ThemedText>}
         
@@ -33,7 +39,7 @@ const Cart = () => {
             style={styles.quantityButton}
             onPress={() => {
               if (item.quantity > 1) {
-                updateQuantity(item.id, item.quantity - 1)
+                updateQuantity(item.productId, item.quantity - 1)
               }
             }}
           >
@@ -44,7 +50,7 @@ const Cart = () => {
           
           <TouchableOpacity 
             style={styles.quantityButton}
-            onPress={() => updateQuantity(item.id, item.quantity + 1)}
+            onPress={() => updateQuantity(item.productId, item.quantity + 1)}
           >
             <ThemedText style={styles.quantityButtonText}>+</ThemedText>
           </TouchableOpacity>
@@ -53,7 +59,7 @@ const Cart = () => {
       
       <TouchableOpacity 
         style={styles.removeButton}
-        onPress={() => removeItem(item.id)}
+        onPress={() => removeItem(item.productId)}
       >
         <Ionicons name="close" size={20} color="#999" />
       </TouchableOpacity>
@@ -77,7 +83,7 @@ const Cart = () => {
         <FlatList
           data={items}
           renderItem={renderCartItem}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.productId.toString()}
           scrollEnabled={false}
         />
         
@@ -103,7 +109,7 @@ const Cart = () => {
         <View style={styles.checkoutButton}>
           <Button 
             title="CHECKOUT" 
-            onPress={() => console.log('Checkout')}
+            onPress={handleCheckout}
             fullWidth
           />
         </View>

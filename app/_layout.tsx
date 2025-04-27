@@ -11,14 +11,18 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ApiProvider } from '@/lib/api/queryProvider';
 import { useAuthStore } from '@/store/authStore';
+import { useCartStore } from '@/store/cartStore';
+import { useFavoritesStore } from '@/store/favoritesStore';
 import LoadingProvider from '@/components/ui/LoadingProvider';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Keep the splash screen visible until we're ready
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const checkAuthState = useAuthStore(state => state.checkAuthState);
+  const { checkAuthState, isLoading: authLoading } = useAuthStore();
+  const { loadCart } = useCartStore();
+  const { loadFavorites } = useFavoritesStore();
   
   const [loadedM] = useSpaceGrotesk({
     Montserrat_600SemiBold,
@@ -33,18 +37,31 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (loadedDM && loadedM) {
-      // Check auth state when app loads
-      checkAuthState().finally(() => {
+    // Load all persistent data when the app starts
+    const initializeApp = async () => {
+      try {
+        // Check if user is already authenticated
+        await checkAuthState();
+        
+        // Load cart and favorites data
+        await loadCart();
+        await loadFavorites();
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+      } finally {
+        // Hide splash screen once initialization is complete
         SplashScreen.hideAsync();
-      });
-    }
-  }, [loadedDM, loadedM, checkAuthState]);
+      }
+    };
+
+    initializeApp();
+  }, []);
 
   const fontsLoaded = loadedM && loadedDM;
 
-  if (!fontsLoaded) {
-    return null; // or <AppLoading />
+  // If auth is still checking, we can keep showing the splash screen
+  if (authLoading || !fontsLoaded) {
+    return null;
   }
 
   return (

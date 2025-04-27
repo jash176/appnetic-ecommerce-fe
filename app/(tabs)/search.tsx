@@ -10,6 +10,7 @@ import { useProducts } from '@/lib/api/hooks/useProducts';
 import { Product } from "../../lib/api/services/types"
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { Ionicons } from '@expo/vector-icons';
+import { getStoreId } from '@/service/storeService';
 
 const PAGE_SIZE = 10;
 
@@ -28,6 +29,7 @@ type ProductWhereInput = {
 }
 
 export default function SearchScreenPage() {
+  const store = getStoreId();
   const { top: paddingTop } = useSafeAreaInsets();
   const [page, setPage] = useState(1);
   const [searchFilter, setSearchFilter] = useState<ProductWhereInput | undefined>(undefined);
@@ -36,6 +38,7 @@ export default function SearchScreenPage() {
 
   const handleSearch = (query: string) => {
     const params = query.length > 0 ? {
+      store: {equals: store},
       or: [
         { title: { contains: query } }
       ]

@@ -14,25 +14,7 @@ import { useCartStore } from '@/store/cartStore'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Haptics from 'expo-haptics'
 import { useProduct } from '@/lib/api/hooks/useProducts'
-
-const variants = [
-  { id: "1", label: "XSS", value: "XSS" },
-  { id: "2", label: "XS", value: "XS" },
-  { id: "3", label: "S", value: "S" },
-  { id: "4", label: "M", value: "M" },
-  { id: "5", label: "L", value: "L" },
-  { id: "6", label: "XL", value: "Xl" },
-  { id: "7", label: "XXL", value: "XXL" }
-]
-
-// Mock product data - in a real app, this would come from an API or route params
-const productData = {
-  id: "prod-1",
-  title: "Tie-Belt Shirt Dress",
-  price: 1999.00,
-  image: "https://image.hm.com/content/dam/global_campaigns/season_01/women/startpage-assets/wk16/DS21G-2x3-women-startpage-wk16.jpg?imwidth=320",
-  description: "A stylish shirt dress with a tie belt for a flattering silhouette."
-}
+import { Media } from '@/lib/api/services/types'
 
 const ProductDetails = () => {
   const { id } = useLocalSearchParams();
@@ -40,7 +22,7 @@ const ProductDetails = () => {
   const [isAddButtonVisible, setIsAddButtonVisible] = useState(false);
   const addButtonRef = useRef<View>(null);
   const { height: windowHeight } = useWindowDimensions();
-  const [selectedVariant, setSelectedVariant] = useState(variants[0].id);
+  const [selectedVariant, setSelectedVariant] = useState(data && data.variants && data.variants.length > 0 ? data.variants[0].id : '');
   const { addItem } = useCartStore();
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -53,18 +35,17 @@ const ProductDetails = () => {
   };
 
   const handleAddToCart = () => {
-    // Get the selected variant value
-    const selectedVariantValue = variants.find(v => v.id === selectedVariant)?.value || '';
-    
-    // Add the product to cart
-    // addItem({
-    //   id: `${productData.id}-${selectedVariantValue}`,
-    //   title: productData.title,
-    //   price: productData.price,
-    //   image: productData.image,
-    //   variant: selectedVariantValue
-    // });
-    
+    if(data) {
+      const productImage = data.images ? data.images[0].image as Media : undefined
+      // Add the product to cart
+      addItem({
+        productId: data.id,
+        productTitle: data.title,
+        price: data.price,
+        image: productImage?.filename,
+      });
+      
+    }
     // Provide haptic feedback
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     
@@ -100,7 +81,7 @@ const ProductDetails = () => {
           <ThemedText type='subtitle' style={styles.productTaxStatus}>Mrp inclusive of all taxes</ThemedText>
         </View>
         <View style={{marginTop: 48, marginBottom: 30}}>
-          <VariantSelector variantTitle='SELECT SIZES' options={data.variants} selectedValue={selectedVariant} onSelect={setSelectedVariant} />
+          <VariantSelector variantTitle='SELECT SIZES' options={data.variants} selectedValue={selectedVariant as string | undefined} onSelect={setSelectedVariant} />
           <SizeGuide />
         </View>
         <View ref={addButtonRef}>
@@ -108,7 +89,7 @@ const ProductDetails = () => {
         </View>
         <View style={{marginVertical: 50}}>
           <Accordion title='DESCRIPTION & FIT' >
-            <ThemedText>{productData.description}</ThemedText>
+            <ThemedText>Hello World</ThemedText>
           </Accordion>
           <Accordion title='DELIVERY & PAYMENT' >
             <ThemedText>Free delivery on orders above Rs. 999. Cash on delivery available.</ThemedText>

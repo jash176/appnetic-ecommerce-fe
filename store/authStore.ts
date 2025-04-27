@@ -1,5 +1,10 @@
 import { create } from 'zustand';
 import payloadClient, { createAuthenticatedClient } from '@/lib/api/payloadClient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Storage keys
+const AUTH_TOKEN_KEY = 'auth_token';
+const USER_DATA_KEY = 'user_data';
 
 interface User {
   id: string;
@@ -18,7 +23,7 @@ interface AuthState {
   // Actions
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<boolean>;
-  register: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>;
+  register: (email: string, password: string, name: string, phone?: string) => Promise<void>;
   checkAuthState: () => Promise<void>;
   clearError: () => void;
 }
@@ -47,6 +52,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         user: response.user,
         isLoading: false,
       });
+      
+      // Persist auth data
+      await AsyncStorage.setItem(AUTH_TOKEN_KEY, response.token);
+      await AsyncStorage.setItem(USER_DATA_KEY, JSON.stringify(response.user));
       
       return true;
     } catch (error: any) {
@@ -77,6 +86,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false,
       });
       
+      // Clear persisted auth data
+      await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+      await AsyncStorage.removeItem(USER_DATA_KEY);
+      
       return true;
     } catch (error: any) {
       set({
@@ -87,16 +100,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   
-  register: async (email: string, password: string, firstName?: string, lastName?: string) => {
+  register: async (email: string, password: string, name: string, phone?: string) => {
     try {
       set({ isLoading: true, error: null });
       
       // Call PayloadCMS register endpoint
       await payloadClient.collections.users.create({
-        email,
-        password,
-        firstName,
-        lastName,
+        
+        doc: {
+          email,
+          password,
+          phone,
+          name,
+          role: 'customer',
+        }
       });
       
       // Login after successful registration
@@ -113,25 +130,48 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      // Get token from store
-      const token = get().token;
+      // Try to get token from AsyncStorage first
+      const storedToken = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+      const storedUserData = await AsyncStorage.getItem(USER_DATA_KEY);
       
-      if (!token) {
-        set({ isLoading: false });
+      // If no stored token, user is not authenticated
+      if (!storedToken) {
+        set({ 
+          isLoading: false,
+          isAuthenticated: false
+        });
         return;
       }
       
-      // Verify token and get user data
-      const client = createAuthenticatedClient(token);
-      const response = await client.collections.users.me({});
-      
+      // Set the token and user from AsyncStorage
+      const userData = storedUserData ? JSON.parse(storedUserData) : null;
       set({
-        user: response.user,
-        isLoading: false,
+        token: storedToken,
+        user: userData,
+        isAuthenticated: true,
       });
+      
+      // Verify token is still valid with the server
+      try {
+        const client = createAuthenticatedClient(storedToken);
+        const response = await client.collections.users.me({});
+        
+        // Update user data if it's changed
+        set({
+          user: response.user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        
+        // Update stored user data if needed
+        await AsyncStorage.setItem(USER_DATA_KEY, JSON.stringify(response.user));
+      } catch (serverError) {
+        // Token is invalid/expired, clear auth state
+        await get().logout();
+      }
     } catch (error) {
-      // Token is invalid, clear auth state
-      get().logout();
+      // Something went wrong, clear auth state
+      await get().logout();
       set({ isLoading: false });
     }
   },

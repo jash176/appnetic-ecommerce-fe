@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FlatList, ListRenderItem, StyleSheet, View, TouchableOpacity } from 'react-native';
 import SearchBar from '@/components/ui/SearchBar';
 import { ThemedText } from '@/components/ThemedText';
@@ -8,23 +8,24 @@ import Footer from '@/components/ui/Footer';
 import { router } from 'expo-router';
 import { useProducts } from '@/lib/api/hooks/useProducts';
 import { Product } from "../../lib/api/services/types"
-import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { Ionicons } from '@expo/vector-icons';
 import { getStoreId } from '@/service/storeService';
+import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import SortAndFilter from '@/components/SortAndFilter';
 
 const PAGE_SIZE = 10;
 
 type ProductWhereInput = {
   or: ({
-      title: {
-          contains: string;
-      };
-      description?: undefined;
+    title: {
+      contains: string;
+    };
+    description?: undefined;
   } | {
-      description: {
-          contains: string;
-      };
-      title?: undefined;
+    description: {
+      contains: string;
+    };
+    title?: undefined;
   })[];
 }
 
@@ -35,15 +36,18 @@ export default function SearchScreenPage() {
   const [searchFilter, setSearchFilter] = useState<ProductWhereInput | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState("Explore");
   const [hasSearched, setHasSearched] = useState(false);
-
+  const [
+    nonCollidingMultiSliderValue,
+    setNonCollidingMultiSliderValue,
+  ] = React.useState([0, 100]);
   const handleSearch = (query: string) => {
     const params = query.length > 0 ? {
-      store: {equals: store},
+      store: { equals: store },
       or: [
         { title: { contains: query } }
       ]
     } : undefined;
-    
+
     setSearchFilter(params);
     setSearchQuery(query.length > 0 ? query : "Explore");
     setHasSearched(true);
@@ -107,6 +111,9 @@ export default function SearchScreenPage() {
     return "Fetching products...";
   };
 
+  const nonCollidingMultiSliderValuesChange = (values: number[]) =>
+    setNonCollidingMultiSliderValue(values);
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -115,22 +122,44 @@ export default function SearchScreenPage() {
         renderItem={renderItem}
         ItemSeparatorComponent={() => <View style={{ height: 50 }} />}
         contentContainerStyle={[
-          styles.listContent, 
+          styles.listContent,
           { paddingTop }
         ]}
         numColumns={2}
         ListHeaderComponent={<View>
+          {/* <MultiSlider
+            sliderLength={280}
+            values={[
+              nonCollidingMultiSliderValue[0],
+              nonCollidingMultiSliderValue[1],
+            ]}
+            onValuesChange={nonCollidingMultiSliderValuesChange}
+            min={0}
+            max={100}
+            step={1}
+            allowOverlap={false}
+            snapped
+            minMarkerOverlapDistance={40}
+            selectedStyle={{backgroundColor:"red"}}
+          /> */}
           <SearchBar
             placeholder="Search products"
             onSearch={handleSearch}
             initialValue={""}
           />
           <ThemedText style={styles.searchHeading} type='heading'>{searchQuery}</ThemedText>
+          <SortAndFilter
+  onSortChange={(sort) => console.log('Sort:', sort)}
+  onFilterChange={(range) => console.log('Range:', range)}
+  filterRange={[0, 5000]}
+  initialSort="price_asc"
+  initialRange={[100, 1000]}
+/>
         </View>}
         ListEmptyComponent={renderEmptyComponent}
         ListFooterComponent={<Footer />}
       />
-      
+
       {/* Error state */}
       {isError && (
         <View style={styles.errorContainer}>
@@ -155,7 +184,7 @@ const styles = StyleSheet.create({
     minHeight: '100%', // Ensure empty state fills the screen
   },
   searchHeading: {
-    textTransform: "uppercase", 
+    textTransform: "uppercase",
     paddingHorizontal: 16,
     marginBottom: 16,
   },

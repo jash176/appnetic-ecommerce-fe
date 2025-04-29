@@ -19,7 +19,6 @@ const CollectionCard = (props: CollectionCardProps) => {
   const {item, onPress, width} = props;
   const collection = item.collection as Collection
   const image = collection.image as Media
-  console.log("item?.collection.image?.url : ", getFullImageUrl(image.filename as string))
   return (
     <Pressable onPress={onPress}>
       <Image

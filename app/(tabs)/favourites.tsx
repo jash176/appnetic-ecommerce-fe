@@ -13,38 +13,16 @@ import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import { useCartStore } from '@/store/cartStore';
-import { useAuthStore } from '@/store/authStore';
 import { router } from 'expo-router';
 import Button from '@/components/ui/Button';
 
 const Favourites = () => {
   const { favorites, isLoading, removeFavorite, loadFavorites } = useFavoritesStore();
   const { addItem } = useCartStore();
-  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     loadFavorites();
   }, []);
-
-  // If user is not authenticated, show login prompt
-  if (!isAuthenticated) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.emptyStateContainer}>
-          <Ionicons name="heart-outline" size={80} color="#ccc" />
-          <ThemedText style={styles.emptyStateTitle}>Sign in to see your favorites</ThemedText>
-          <ThemedText style={styles.emptyStateSubtitle}>
-            Your favorite items will be saved here
-          </ThemedText>
-          <Button
-            title="Sign In"
-            onPress={() => router.push('/login')}
-            style={styles.actionButton}
-          />
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   const handleRemoveFavorite = (productId: number) => {
     Alert.alert(

@@ -148,7 +148,7 @@ const Profile = () => {
           title="Logout"
           onPress={handleLogout}
           variant="outline"
-          isLoading={isLoading}
+          loading={isLoading}
           style={styles.logoutButton}
         />
         <ThemedText onPress={() => {

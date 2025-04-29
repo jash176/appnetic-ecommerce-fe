@@ -6,9 +6,9 @@ import { ThemedText } from './ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 
 const SORT_OPTIONS = [
-  { label: 'Newest', value: 'newest' },
-  { label: 'Highest Price', value: 'price_desc' },
-  { label: 'Lowest Price', value: 'price_asc' },
+  { label: 'Newest', value: 'createdAt' },
+  { label: 'Highest Price', value: 'price' },
+  { label: 'Lowest Price', value: '-price' },
 ];
 
 interface SortAndFilterProps {

@@ -5,7 +5,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import payloadClient from '@/lib/api/payloadClient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import Button from '@/components/ui/ecommerce/Button';
+import Button from '@/components/ui/Button';
 
 export default function OrderConfirmationPage() {
   const { orderId } = useLocalSearchParams();

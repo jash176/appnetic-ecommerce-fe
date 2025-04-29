@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Modal, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import Button from '@/components/ui/ecommerce/Button';
+import Button from '@/components/ui/Button';
 import payloadClient from '@/lib/api/payloadClient';
 import { useAuthStore } from '@/store/authStore';
 

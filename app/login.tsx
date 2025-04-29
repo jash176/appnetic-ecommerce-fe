@@ -117,7 +117,7 @@ export default function Login() {
                 title="Sign In"
                 onPress={handleLogin}
                 fullWidth
-                isLoading={isLoading}
+                loading={isLoading}
                 style={styles.loginButton}
               />
 

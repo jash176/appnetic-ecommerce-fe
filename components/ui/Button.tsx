@@ -15,7 +15,7 @@ interface ButtonProps extends TouchableOpacityProps {
   title: string;
   onPress: () => void;
   fullWidth?: boolean;
-  isLoading?: boolean;
+  loading?: boolean;
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'small' | 'medium' | 'large';
   textStyle?: StyleProp<TextStyle>;
@@ -26,7 +26,7 @@ const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
   fullWidth = false,
-  isLoading = false,
+  loading = false,
   variant = 'primary',
   size = 'medium',
   textStyle,
@@ -54,11 +54,11 @@ const Button: React.FC<ButtonProps> = ({
     <TouchableOpacity
       style={buttonStyles}
       onPress={onPress}
-      disabled={isLoading}
+      disabled={loading}
       activeOpacity={0.7}
       {...rest}
     >
-      {isLoading ? (
+      {loading ? (
         <ActivityIndicator 
           size="small" 
           color={variant === 'primary' ? '#fff' : '#000'} 

@@ -1,66 +1,33 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { FlatList, ListRenderItem, StyleSheet, View, TouchableOpacity } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
+import { FlatList, ListRenderItem, StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
 import SearchBar from '@/components/ui/SearchBar';
 import { ThemedText } from '@/components/ThemedText';
 import ProductCard from '@/components/ui/ecommerce/ProductCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Footer from '@/components/ui/Footer';
 import { router } from 'expo-router';
-import { useProducts } from '@/lib/api/hooks/useProducts';
+import { useCategories, useProducts } from '@/lib/api/hooks/useProducts';
 import { Product } from "../../lib/api/services/types"
-import { Ionicons } from '@expo/vector-icons';
-import { getStoreId } from '@/service/storeService';
-import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import SortAndFilter from '@/components/SortAndFilter';
+import CategoryCard from '@/components/ui/ecommerce/CategoryCard';
 
 const PAGE_SIZE = 10;
 
-type ProductWhereInput = {
-  or: ({
-    title: {
-      contains: string;
-    };
-    description?: undefined;
-  } | {
-    description: {
-      contains: string;
-    };
-    title?: undefined;
-  })[];
-}
-
 export default function SearchScreenPage() {
-  const store = getStoreId();
   const { top: paddingTop } = useSafeAreaInsets();
-  const [page, setPage] = useState(1);
-  const [searchFilter, setSearchFilter] = useState<ProductWhereInput | undefined>(undefined);
-  const [searchQuery, setSearchQuery] = useState("Explore");
-  const [hasSearched, setHasSearched] = useState(false);
-  const [
-    nonCollidingMultiSliderValue,
-    setNonCollidingMultiSliderValue,
-  ] = React.useState([0, 100]);
   const handleSearch = (query: string) => {
-    const params = query.length > 0 ? {
-      store: { equals: store },
-      or: [
-        { title: { contains: query } }
-      ]
-    } : undefined;
-
-    setSearchFilter(params);
-    setSearchQuery(query.length > 0 ? query : "Explore");
-    setHasSearched(true);
+    router.push({
+      pathname: "/products",
+      params: {query: query}
+    })
   }
 
   const productParams = useMemo(() => ({
-    page,
+    page: 1,
     limit: PAGE_SIZE,
-    where: searchFilter,
-  }), [page, searchFilter]);
+  }), []);
 
-  // Use our products hook
   const { data, isError, refetch } = useProducts(productParams);
+  const { data: categories } = useCategories();
 
   // Handle retry on error
   const handleRetry = () => {
@@ -69,55 +36,15 @@ export default function SearchScreenPage() {
 
   const renderItem: ListRenderItem<Product> = useCallback(({ item, index }) => {
     return (
-      <ProductCard item={item} onPress={() => router.push(`/${item.id}`)} />
+      <View >
+        <ProductCard item={item} onPress={() => router.push(`/${item.id}`)} />
+      </View>
     )
   }, [])
-
-  // Empty results component
-  const renderEmptyComponent = () => {
-    return (
-      <View style={styles.emptyContainer}>
-        {hasSearched && searchQuery !== "Explore" ? (
-          <>
-            <Ionicons name="search-outline" size={50} color="#ccc" />
-            <ThemedText style={styles.emptyTitle}>No results found</ThemedText>
-            <ThemedText style={styles.emptyText}>
-              We couldn't find any products matching "{searchQuery}"
-            </ThemedText>
-            <TouchableOpacity
-              style={styles.emptyButton}
-              onPress={() => handleSearch("")}
-            >
-              <ThemedText>View All Products</ThemedText>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <>
-            <Ionicons name="pricetag-outline" size={50} color="#ccc" />
-            <ThemedText style={styles.emptyTitle}>Discover Products</ThemedText>
-            <ThemedText style={styles.emptyText}>
-              Search for products or browse our catalog
-            </ThemedText>
-          </>
-        )}
-      </View>
-    );
-  };
-
-  // Determine the loading message based on the search state
-  const getLoadingMessage = () => {
-    if (!hasSearched) return "Loading products...";
-    if (searchQuery !== "Explore") return `Searching for "${searchQuery}"...`;
-    return "Fetching products...";
-  };
-
-  const nonCollidingMultiSliderValuesChange = (values: number[]) =>
-    setNonCollidingMultiSliderValue(values);
-
   return (
     <View style={styles.container}>
       <FlatList
-        data={data}
+        data={data ? data.docs : []}
         style={{ backgroundColor: "#FFF" }}
         renderItem={renderItem}
         ItemSeparatorComponent={() => <View style={{ height: 50 }} />}
@@ -127,36 +54,31 @@ export default function SearchScreenPage() {
         ]}
         numColumns={2}
         ListHeaderComponent={<View>
-          {/* <MultiSlider
-            sliderLength={280}
-            values={[
-              nonCollidingMultiSliderValue[0],
-              nonCollidingMultiSliderValue[1],
-            ]}
-            onValuesChange={nonCollidingMultiSliderValuesChange}
-            min={0}
-            max={100}
-            step={1}
-            allowOverlap={false}
-            snapped
-            minMarkerOverlapDistance={40}
-            selectedStyle={{backgroundColor:"red"}}
-          /> */}
           <SearchBar
             placeholder="Search products"
             onSearch={handleSearch}
             initialValue={""}
           />
-          <ThemedText style={styles.searchHeading} type='heading'>{searchQuery}</ThemedText>
-          <SortAndFilter
-  onSortChange={(sort) => console.log('Sort:', sort)}
-  onFilterChange={(range) => console.log('Range:', range)}
-  filterRange={[0, 5000]}
-  initialSort="price_asc"
-  initialRange={[100, 1000]}
-/>
+          <ThemedText style={styles.searchHeading} type='heading'>Categories</ThemedText>
+          <ThemedText type='title' style={styles.viewAllText} onPress={() => { }}>View all</ThemedText>
+          <FlatList
+            data={categories}
+            keyExtractor={(item, index) => `${index}-${item.id}`}
+            horizontal
+            renderItem={({ item }) => (
+              <CategoryCard
+                width={Dimensions.get("window").width / 2.2}
+                item={{ category: item }}
+                onPress={() => router.push({
+                  pathname: '/category/[id]',
+                  params: { id: item.id.toString(), name: item.name },
+                })}
+              />
+            )}
+            showsHorizontalScrollIndicator={false}
+          />
+          <ThemedText style={styles.searchHeading} type='heading'>Products</ThemedText>
         </View>}
-        ListEmptyComponent={renderEmptyComponent}
         ListFooterComponent={<Footer />}
       />
 
@@ -185,7 +107,6 @@ const styles = StyleSheet.create({
   },
   searchHeading: {
     textTransform: "uppercase",
-    paddingHorizontal: 16,
     marginBottom: 16,
   },
   errorContainer: {
@@ -230,5 +151,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
+  },
+  viewAllText: {
+    textAlign: "right",
+    padding: 8
   }
 })

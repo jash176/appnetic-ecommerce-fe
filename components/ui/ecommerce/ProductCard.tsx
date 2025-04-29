@@ -3,10 +3,8 @@ import React, { useState } from 'react'
 import { ThemedText } from '@/components/ThemedText'
 import { Ionicons } from '@expo/vector-icons';
 import ProductImageCarousel from './ProductImageCarousel';
-import { useCartStore } from '@/store/cartStore';
-import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { Media, Product } from '@/lib/api/services/types';
+import { Product } from '@/lib/api/services/types';
 
 interface ProductCardProps {
   width?: number;
@@ -24,7 +22,6 @@ const ProductCard = (props: ProductCardProps) => {
   } = props;
   
   const [liked, setLiked] = useState(false);
-  const { addItem } = useCartStore();
 
   const handlePress = () => {
     if (onPress) {
@@ -33,21 +30,6 @@ const ProductCard = (props: ProductCardProps) => {
       // Navigate to product details
       router.push(`/${item.id}`);
     }
-  };
-
-  const handleAddToCart = (e: any) => {
-    e.stopPropagation();
-    
-    // Add to cart with default variant
-    // addItem({
-    //   id: product.id,
-    //   title: product.title,
-    //   price: product.price,
-    //   image: product.image,
-    // });
-    
-    // Provide haptic feedback
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   // Check if there's a compare price available
@@ -83,12 +65,6 @@ const ProductCard = (props: ProductCardProps) => {
               Rs. {item.price.toFixed(2)}
             </ThemedText>
           </View>
-          <TouchableOpacity 
-            style={styles.addToCartButton}
-            onPress={handleAddToCart}
-          >
-            <Ionicons name="bag-add-outline" size={18} color="#000" />
-          </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>
@@ -117,7 +93,8 @@ const styles = StyleSheet.create({
     marginTop: 4
   },
   priceContainer: {
-    flexDirection: 'column',
+    flexDirection: 'row-reverse',
+    alignItems: "center"
   },
   comparePrice: {
     textDecorationLine: 'line-through',
@@ -126,6 +103,7 @@ const styles = StyleSheet.create({
   },
   salePrice: {
     color: '#EE3434',
+    marginRight: 6
   },
   addToCartButton: {
     padding: 8,

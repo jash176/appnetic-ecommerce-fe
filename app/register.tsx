@@ -149,7 +149,7 @@ export default function Register() {
                 title="Create Account"
                 onPress={handleRegister}
                 fullWidth
-                isLoading={isLoading}
+                loading={isLoading}
                 style={styles.registerButton}
               />
 

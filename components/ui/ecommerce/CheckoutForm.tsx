@@ -1,8 +1,9 @@
 import React, { useCallback } from 'react';
-import { View, StyleSheet, TextInput, Switch, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, StyleSheet, TextInput, Switch, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import FormField from '../FormField';
 import AddressForm, { AddressFormData } from '../AddressForm';
+import { Ionicons } from '@expo/vector-icons';
 
 export interface CheckoutFormData {
   name: string;
@@ -11,24 +12,33 @@ export interface CheckoutFormData {
   shippingAddress: AddressFormData;
   billingAddressSameAsShipping: boolean;
   billingAddress: AddressFormData;
-  paymentMethod: string;
+  paymentMethod: 'cod' | 'razorpay';
 }
 
 interface CheckoutFormProps {
   formData: CheckoutFormData;
   onChange: (field: string, value: any) => void;
   onBillingToggle: (value: boolean) => void;
+  onPaymentMethodChange?: (method: 'cod' | 'razorpay') => void;
 }
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
   formData,
   onChange,
-  onBillingToggle
+  onBillingToggle,
+  onPaymentMethodChange
 }) => {
 
   const handleNameChange = useCallback((field: string, value: string) => {
     onChange(field, value);
   }, [onChange]);
+
+  const handlePaymentMethodChange = useCallback((method: 'cod' | 'razorpay') => {
+    onChange('paymentMethod', method);
+    if (onPaymentMethodChange) {
+      onPaymentMethodChange(method);
+    }
+  }, [onChange, onPaymentMethodChange]);
 
   return (
     <View>
@@ -85,9 +95,31 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       <View style={styles.section}>
         <ThemedText style={styles.sectionTitle}>Payment Method</ThemedText>
 
-        <View style={[styles.paymentOption, formData.paymentMethod === 'cod' && styles.selectedPayment]}>
-          <ThemedText style={styles.paymentOptionText}>Cash on Delivery (COD)</ThemedText>
-        </View>
+        <TouchableOpacity 
+          style={[styles.paymentOption, formData.paymentMethod === 'cod' && styles.selectedPayment]}
+          onPress={() => handlePaymentMethodChange('cod')}
+        >
+          <View style={styles.paymentOptionContent}>
+            <Ionicons name="cash-outline" size={24} color="#333" />
+            <ThemedText style={styles.paymentOptionText}>Cash on Delivery (COD)</ThemedText>
+          </View>
+          {formData.paymentMethod === 'cod' && (
+            <Ionicons name="checkmark-circle" size={24} color="#000" />
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.paymentOption, formData.paymentMethod === 'razorpay' && styles.selectedPayment]}
+          onPress={() => handlePaymentMethodChange('razorpay')}
+        >
+          <View style={styles.paymentOptionContent}>
+            <Ionicons name="card-outline" size={24} color="#333" />
+            <ThemedText style={styles.paymentOptionText}>Pay Online (Razorpay)</ThemedText>
+          </View>
+          {formData.paymentMethod === 'razorpay' && (
+            <Ionicons name="checkmark-circle" size={24} color="#000" />
+          )}
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -117,7 +149,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 4,
-    marginBottom: 8,
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  paymentOptionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   selectedPayment: {
     borderColor: '#000',
@@ -125,7 +164,8 @@ const styles = StyleSheet.create({
   },
   paymentOptionText: {
     fontSize: 16,
+    marginLeft: 12,
   },
 });
 
-export default CheckoutForm; 
+export default CheckoutForm;

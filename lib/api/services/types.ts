@@ -180,7 +180,30 @@ export interface Store {
     timezone?: string | null;
     emailNotifications?: boolean | null;
   };
+  businessDetails: {
+    phone: string;
+    category: string;
+    subcategory: string;
+    address: {
+      street1: string;
+      street2: string;
+      city: string;
+      state: string;
+      postal_code: string;
+      country: string;
+    };
+  };
   active?: boolean | null;
+  razorpay?: {
+    /**
+     * Razorpay sub-account ID for payouts via Routes
+     */
+    accountId?: string | null;
+    /**
+     * Platform commission percentage
+     */
+    defaultCommissionPercent?: number | null;
+  };
   storeId?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -359,11 +382,16 @@ export interface Order {
     phone?: string | null;
   };
   paymentInfo: {
-    method: 'credit_card' | 'paypal' | 'bank_transfer' | 'cod';
+    method: 'razorpay' | 'cod';
     transactionId?: string | null;
     status: 'pending' | 'completed' | 'failed' | 'refunded';
   };
   notes?: string | null;
+  razorpay?: {
+    orderId?: string | null;
+    paymentId?: string | null;
+    signature?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -502,7 +530,7 @@ export interface Collection {
     [k: string]: unknown;
   } | null;
   products?: (number | Product)[] | null;
-  image?: null | Media;
+  image?: (number | null) | Media;
   /**
    * Whether products are automatically added based on conditions
    */
@@ -750,7 +778,30 @@ export interface StoresSelect<T extends boolean = true> {
         timezone?: T;
         emailNotifications?: T;
       };
+  businessDetails?:
+    | T
+    | {
+        phone?: T;
+        category?: T;
+        subcategory?: T;
+        address?:
+          | T
+          | {
+              street1?: T;
+              street2?: T;
+              city?: T;
+              state?: T;
+              postal_code?: T;
+              country?: T;
+            };
+      };
   active?: T;
+  razorpay?:
+    | T
+    | {
+        accountId?: T;
+        defaultCommissionPercent?: T;
+      };
   storeId?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -903,6 +954,13 @@ export interface OrdersSelect<T extends boolean = true> {
         status?: T;
       };
   notes?: T;
+  razorpay?:
+    | T
+    | {
+        orderId?: T;
+        paymentId?: T;
+        signature?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

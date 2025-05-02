@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "appnetic-ecommerce-base",
-    "slug": "appnetic-ecommerce-base",
+    "name": "com-pavao-appnetic",
+    "slug": "com-pavao-appnetic",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,13 +9,17 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.pavao.appnetic"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "googleServicesFile": "./google-services.json",
+      "package": "com.pavao.appnetic"
     },
     "web": {
       "bundler": "metro",
@@ -37,13 +41,28 @@
         "expo-font",
         {
           "fonts": [
-            "node_modules/@expo-google-fonts/space-grotesk/Montserrat_600SemiBold.ttf",
-            "node_modules/@expo-google-fonts/space-grotesk/Montserrat_700Bold.ttf",
-            "node_modules/@expo-google-fonts/dm-sans/DMSans_400Regular.ttf",
-            "node_modules/@expo-google-fonts/dm-sans/DMSans_500Medium.ttf",
-            "node_modules/@expo-google-fonts/dm-sans/DMSans_600SemiBold.ttf",
-            "node_modules/@expo-google-fonts/dm-sans/DMSans_700Bold.ttf"
+            "node_modules/@expo-google-fonts/montserrat/600SemiBold/Montserrat_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/montserrat/700Bold/Montserrat_700Bold.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/400Regular/DMSans_400Regular.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/500Medium/DMSans_500Medium.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/600SemiBold/DMSans_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/700Bold/DMSans_700Bold.ttf"
           ]
+        }
+      ],
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      [
+        "expo-dev-client",
+        {
+          "launchMode": "most-recent"
         }
       ]
     ],

@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   },
   userEmail: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
   },
   editButton: {
     paddingVertical: 6,
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   },
   loginSubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginBottom: 30,
   },

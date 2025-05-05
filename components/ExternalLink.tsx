@@ -1,24 +1,36 @@
-import { Link } from 'expo-router';
+import { Pressable, Text } from 'react-native';
 import { openBrowserAsync } from 'expo-web-browser';
 import { type ComponentProps } from 'react';
 import { Platform } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-type Props = Omit<ComponentProps<typeof Link>, 'href'> & { href: string };
+type Props = {
+  href: string;
+  children: React.ReactNode;
+  style?: ComponentProps<typeof Text>['style'];
+};
 
-export function ExternalLink({ href, ...rest }: Props) {
+export function ExternalLink({ href, children, style }: Props) {
+  const handlePress = async () => {
+    if (Platform.OS !== 'web') {
+      // Open the link in an in-app browser on mobile
+      await openBrowserAsync(href);
+    } else {
+      // On web, open in a new tab
+      window.open(href, '_blank');
+    }
+  };
+
   return (
-    <Link
-      target="_blank"
-      {...rest}
-      href={href}
-      onPress={async (event) => {
-        if (Platform.OS !== 'web') {
-          // Prevent the default behavior of linking to the default browser on native.
-          event.preventDefault();
-          // Open the link in an in-app browser.
-          await openBrowserAsync(href);
-        }
-      }}
-    />
+    <Pressable onPress={handlePress}>
+      <Text style={[styles.link, style]}>{children}</Text>
+    </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  link: {
+    color: '#0000EE',
+    textDecorationLine: 'underline',
+  },
+});

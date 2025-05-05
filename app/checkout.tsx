@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import Button from '@/components/ui/Button';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
+import { useAddressStore } from '@/store/addressStore';
 import payloadClient from '@/lib/api/payloadClient';
 import CheckoutForm, { CheckoutFormData } from '@/components/ui/ecommerce/CheckoutForm';
 import OrderSummary from '@/components/ui/ecommerce/OrderSummary';
@@ -13,15 +14,46 @@ import PasswordCreationModal from '@/components/ui/ecommerce/PasswordCreationMod
 import { formatCreatePayload, extractId } from '@/lib/api/utils';
 import { set } from 'lodash';
 import { getStoreId } from '@/service/storeService';
+
 export default function CheckoutPage() {
   const { top } = useSafeAreaInsets();
   const { items, clearCart, getSubtotal } = useCartStore();
   const { user, isAuthenticated } = useAuthStore();
+  const { addresses, addAddress, loadAddresses } = useAddressStore();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [customerData, setCustomerData] = useState<any>(null);
   const [orderId, setOrderId] = useState<number | null>(null);
+  
+  // Load addresses when component mounts and pre-fill default address if available
+  useEffect(() => {
+    const loadDefaultAddress = async () => {
+      await loadAddresses();
+      
+      // Find default address and pre-fill if found
+      const defaultAddress = addresses.find(addr => addr.isDefault);
+      if (defaultAddress) {
+        setFormData(prev => ({
+          ...prev,
+          shippingAddress: {
+            name: defaultAddress.name,
+            line1: defaultAddress.line1,
+            line2: defaultAddress.line2 || '',
+            city: defaultAddress.city,
+            state: defaultAddress.state,
+            postalCode: defaultAddress.postalCode,
+            country: defaultAddress.country,
+            phone: defaultAddress.phone
+          }
+        }));
+      }
+    };
+    
+    if (isAuthenticated) {
+      loadDefaultAddress();
+    }
+  }, []);
   
   // Form state for checkout
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -87,6 +119,39 @@ const handleChange = (field: string, value: any) => {
     setIsSubmitting(true);
     
     try {
+      // Save shipping address to AsyncStorage if user is authenticated
+      if (isAuthenticated) {
+        try {
+          // Check if we already have this address saved
+          const addressExists = addresses.some(addr => 
+            addr.line1 === formData.shippingAddress.line1 &&
+            addr.city === formData.shippingAddress.city &&
+            addr.state === formData.shippingAddress.state &&
+            addr.postalCode === formData.shippingAddress.postalCode
+          );
+          
+          // If address doesn't exist and we have less than 3 addresses, save it
+          if (!addressExists && addresses.length < 3) {
+            const shippingAddr = {
+              name: formData.shippingAddress.name,
+              line1: formData.shippingAddress.line1,
+              line2: formData.shippingAddress.line2 || '',
+              city: formData.shippingAddress.city,
+              state: formData.shippingAddress.state,
+              postalCode: formData.shippingAddress.postalCode,
+              country: formData.shippingAddress.country,
+              phone: formData.shippingAddress.phone || '',
+              // Make it default if it's the first address
+              isDefault: addresses.length === 0
+            };
+            await addAddress(shippingAddr);
+          }
+        } catch (error) {
+          console.error("Failed to save address:", error);
+          // Continue with checkout even if address saving fails
+        }
+      }
+      
       // Step 1: Check if customer exists or create new customer
       let customerId: number;
       
@@ -97,7 +162,7 @@ const handleChange = (field: string, value: any) => {
             equals: formData.email
           },
           store: {
-            equals: 1
+            equals: getStoreId()
           }
         }
       });
@@ -142,10 +207,10 @@ const handleChange = (field: string, value: any) => {
       }));
       
       const subtotal = getSubtotal();
-      
+      console.log("Customer : ", customerId)
       const orderData = {
         orderNumber: `ORD-${Date.now()}`,
-        store: 1,
+        store: getStoreId(),
         customer: customerId,
         items: orderItems,
         subtotal,

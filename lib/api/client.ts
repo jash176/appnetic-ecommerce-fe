@@ -9,7 +9,7 @@ import axios from 'axios';
  * Base API client for making requests to PayloadCMS
  */
 const apiClient = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3000/api',
+  baseURL:'http://192.168.29.51:3000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -34,15 +34,9 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle specific error codes or formats returned by PayloadCMS
-    const errorResponse = error.response;
-    
-    if (errorResponse && errorResponse.status === 401) {
-      // Handle unauthorized - maybe clear token or redirect to login
-    }
-    
+    console.error('API Error:', error.message, error.response);
     return Promise.reject(error);
   }
 );
 
-export default apiClient; 
+export default apiClient;

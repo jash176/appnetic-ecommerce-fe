@@ -1,17 +1,29 @@
 import { create } from 'zustand';
 import payloadClient, { createAuthenticatedClient } from '@/lib/api/payloadClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { User as PayloadUser } from '@/lib/api/services/types';
 
 // Storage keys
 const AUTH_TOKEN_KEY = 'auth_token';
 const USER_DATA_KEY = 'user_data';
 
-interface User {
+// Our app's User interface
+export interface User {
   id: string;
   email: string;
   firstName?: string;
   lastName?: string;
 }
+
+// Function to convert PayloadCMS user to our app User
+const convertPayloadUserToAppUser = (payloadUser: PayloadUser): User => {
+  return {
+    id: payloadUser.id.toString(),
+    email: payloadUser.email,
+    firstName: payloadUser.name ? payloadUser.name.split(' ')[0] : undefined,
+    lastName: payloadUser.name ? payloadUser.name.split(' ').slice(1).join(' ') : undefined,
+  };
+};
 
 interface AuthState {
   user: User | null;
@@ -45,17 +57,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         password,
       });
       
+      // Convert user to our app's format
+      const appUser = convertPayloadUserToAppUser(response.user);
+      
       // Store token and user data
       set({
         isAuthenticated: true,
         token: response.token,
-        user: response.user,
+        user: appUser,
         isLoading: false,
       });
       
       // Persist auth data
       await AsyncStorage.setItem(AUTH_TOKEN_KEY, response.token);
-      await AsyncStorage.setItem(USER_DATA_KEY, JSON.stringify(response.user));
+      await AsyncStorage.setItem(USER_DATA_KEY, JSON.stringify(appUser));
       
       return true;
     } catch (error: any) {
@@ -75,7 +90,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const token = get().token;
       if (token) {
         const client = createAuthenticatedClient(token);
-        await client.collections.users.logout({});
+        await client.collections.users.logout();
       }
       
       // Clear auth state
@@ -154,17 +169,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Verify token is still valid with the server
       try {
         const client = createAuthenticatedClient(storedToken);
-        const response = await client.collections.users.me({});
+        const response = await client.collections.users.me();
+        
+        // Convert to our app's user format
+        const appUser = convertPayloadUserToAppUser(response.user);
         
         // Update user data if it's changed
         set({
-          user: response.user,
+          user: appUser,
           isAuthenticated: true,
           isLoading: false,
         });
         
         // Update stored user data if needed
-        await AsyncStorage.setItem(USER_DATA_KEY, JSON.stringify(response.user));
+        await AsyncStorage.setItem(USER_DATA_KEY, JSON.stringify(appUser));
       } catch (serverError) {
         // Token is invalid/expired, clear auth state
         await get().logout();

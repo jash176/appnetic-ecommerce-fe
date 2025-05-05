@@ -39,7 +39,7 @@ export default function FeaturedCollection({
   if (isLoading) {
     return (
       <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#000" />
+        <ActivityIndicator size="large" color="#0a7ea4" />
       </View>
     );
   }
@@ -47,7 +47,7 @@ export default function FeaturedCollection({
   if (isError) {
     return (
       <View style={styles.errorContainer}>
-        <ThemedText>Failed to load featured collection</ThemedText>
+        <ThemedText style={{ color: '#e74c3c' }}>Failed to load featured collection</ThemedText>
       </View>
     );
   }
@@ -69,21 +69,22 @@ export default function FeaturedCollection({
   }
 
   const handleProductPress = (productId: number) => {
-    router.push({
-      pathname: "/product-details",
-      params: { id: productId.toString() }
-    });
+    router.push(`/${productId.toString()}`);
   };
 
   return (
     <View style={styles.container}>
       {collection.title && (
-        <ThemedText type="title" style={styles.title}>{collection.title}</ThemedText>
+        <ThemedText type="title" style={[styles.title, { color: '#000000' }]}>
+          {collection.title}
+        </ThemedText>
       )}
       
       {collection.description && (
         <View style={styles.descriptionContainer}>
-          <ThemedText style={styles.description}>{collection.description.toString()}</ThemedText>
+          <ThemedText style={[styles.description, { color: '#000000' }]}>
+            {collection.description.toString()}
+          </ThemedText>
         </View>
       )}
       
@@ -93,6 +94,7 @@ export default function FeaturedCollection({
           <Pressable
             style={styles.productCard}
             onPress={() => handleProductPress(item.id)}
+            android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
           >
             {item.images && item.images.length > 0 && (
               <Image 
@@ -105,8 +107,12 @@ export default function FeaturedCollection({
               />
             )}
             <View style={styles.productInfo}>
-              <ThemedText style={styles.productTitle}>{item.title}</ThemedText>
-              <ThemedText style={styles.productPrice}>${item.price.toFixed(2)}</ThemedText>
+              <ThemedText style={[styles.productTitle, { color: '#000000' }]}>
+                {item.title}
+              </ThemedText>
+              <ThemedText style={[styles.productPrice, { color: '#000000' }]}>
+                ₹{item.price.toFixed(2)}
+              </ThemedText>
             </View>
           </Pressable>
         )}
@@ -127,8 +133,11 @@ export default function FeaturedCollection({
             });
           }
         }}
+        android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
       >
-        <ThemedText style={styles.viewAllText}>View All</ThemedText>
+        <ThemedText style={[styles.viewAllText, { color: '#000000' }]}>
+          View All
+        </ThemedText>
       </Pressable>
     </View>
   );
@@ -138,24 +147,42 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     marginBottom: 20,
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    margin: 16,
   },
   loaderContainer: {
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 12,
+    margin: 16,
+    backgroundColor: '#ffffff',
   },
   errorContainer: {
     padding: 20,
     alignItems: 'center',
+    borderRadius: 12,
+    margin: 16,
+    backgroundColor: '#ffffff',
   },
   emptyContainer: {
     padding: 20,
     alignItems: 'center',
+    borderRadius: 12,
+    margin: 16,
+    backgroundColor: '#ffffff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 12,
+    color: '#333',
   },
   descriptionContainer: {
     marginBottom: 16,
@@ -170,8 +197,8 @@ const styles = StyleSheet.create({
   productCard: {
     width: 160,
     marginRight: 16,
-    backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -191,20 +218,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 4,
+    color: '#333',
   },
   productPrice: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#555',
+    color: '#0a7ea4',
   },
   viewAllButton: {
     marginTop: 16,
     padding: 12,
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
     borderRadius: 8,
+    backgroundColor: '#f5f5f5',
   },
   viewAllText: {
-    fontWeight: '500',
+    fontWeight: '600',
+    color: '#0a7ea4',
   },
 }); 

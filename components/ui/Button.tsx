@@ -36,8 +36,8 @@ const Button: React.FC<ButtonProps> = ({
   // Determine button styles based on props
   const buttonStyles = [
     styles.button,
-    styles[`${variant}Button`],
     styles[`${size}Button`],
+    styles[`${variant}Button`],
     fullWidth && styles.fullWidth,
     style,
   ];
@@ -61,7 +61,7 @@ const Button: React.FC<ButtonProps> = ({
       {loading ? (
         <ActivityIndicator 
           size="small" 
-          color={variant === 'primary' ? '#fff' : '#000'} 
+          color={variant === 'primary' ? '#ffffff' : '#0a7ea4'} 
         />
       ) : (
         <ThemedText style={textStyles}>
@@ -74,26 +74,18 @@ const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 4,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   fullWidth: {
     width: '100%',
-  },
-  
-  // Variant styles
-  primaryButton: {
-    backgroundColor: '#000',
-  },
-  secondaryButton: {
-    backgroundColor: '#f0f0f0',
-  },
-  outlineButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#000',
   },
   
   // Size styles
@@ -110,18 +102,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   
+  // Variant styles
+  primaryButton: {
+    backgroundColor: '#0a7ea4',
+  },
+  secondaryButton: {
+    backgroundColor: '#f0f0f0',
+  },
+  outlineButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#0a7ea4',
+  },
+  
   // Text styles
   text: {
     fontWeight: '600',
   },
   primaryText: {
-    color: '#fff',
+    color: '#000000',
   },
   secondaryText: {
-    color: '#000',
+    color: '#000000',
   },
   outlineText: {
-    color: '#000',
+    color: '#000000',
   },
   smallText: {
     fontSize: 12,

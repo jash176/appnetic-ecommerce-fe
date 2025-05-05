@@ -3,6 +3,7 @@ import { View, TextInput, StyleSheet, TouchableOpacity, Platform } from 'react-n
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { ThemedText } from '@/components/ThemedText';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 interface SearchBarProps {
   placeholder?: string;
@@ -16,6 +17,8 @@ const SearchBar = ({
   initialValue = '',
 }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState(initialValue);
+  const [isFocused, setIsFocused] = useState(false);
+  
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
   const placeholderColor = useThemeColor({}, 'tabIconDefault');
@@ -34,12 +37,19 @@ const SearchBar = ({
   };
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.searchContainer, { backgroundColor }]}>
+    <Animated.View 
+      style={styles.container}
+      entering={FadeIn.duration(400)}
+    >
+      <View style={[
+        styles.searchContainer, 
+        { backgroundColor },
+        isFocused && styles.searchContainerFocused
+      ]}>
         <Ionicons 
           name="search" 
           size={20} 
-          color={placeholderColor} 
+          color={isFocused ? "#4a6eb5" : placeholderColor} 
           style={styles.searchIcon} 
         />
         <TextInput
@@ -51,14 +61,20 @@ const SearchBar = ({
           returnKeyType="search"
           clearButtonMode="while-editing"
           onSubmitEditing={handleSearch}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
         {searchQuery.length > 0 && Platform.OS !== 'ios' && (
-          <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
+          <TouchableOpacity 
+            onPress={clearSearch} 
+            style={styles.clearButton}
+            activeOpacity={0.7}
+          >
             <Ionicons name="close-circle" size={18} color={placeholderColor} />
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -70,16 +86,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  searchContainerFocused: {
+    borderColor: '#4a6eb5',
+    shadowColor: '#4a6eb5',
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: 10,
   },
   searchInput: {
     flex: 1,
@@ -88,7 +112,7 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans_400Regular',
   },
   clearButton: {
-    padding: 4,
+    padding: 6,
   },
 });
 

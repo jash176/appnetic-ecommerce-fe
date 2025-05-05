@@ -14,6 +14,7 @@ export function usePushToken() {
 
   useEffect(() => {
     async function register() {
+     try {
       if (!Device.isDevice) {
         console.warn('Push notifications require a physical device');
         return;
@@ -32,7 +33,9 @@ export function usePushToken() {
         return;
       }
 
-      const { data: expoToken } = await Notifications.getExpoPushTokenAsync();
+      const { data: expoToken } = await Notifications.getExpoPushTokenAsync({
+        projectId: "9c01ad34-ea4b-41ce-875b-32bc54b13bd7"
+      });
       console.log("Expo Token : ", expoToken)
       setToken(expoToken);
 
@@ -74,6 +77,9 @@ export function usePushToken() {
           }
         })
       }
+     }catch(error) {
+      console.log("Error : ", error)
+     }
     }
 
     register();

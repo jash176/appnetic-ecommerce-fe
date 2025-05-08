@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "877700013698",
+    "project_id": "appnetic-3ec06",
+    "storage_bucket": "appnetic-3ec06.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:877700013698:android:33f28ad2944ce2c9711e9b",
+        "android_client_info": {
+          "package_name": "com.pavao.appnetic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkr4ZYi2f_MJMH2oJjzMtSaZRyflLPvbM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

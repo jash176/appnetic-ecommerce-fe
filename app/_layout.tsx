@@ -14,11 +14,13 @@ import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import LoadingProvider from '@/components/ui/LoadingProvider';
+import { usePushToken } from '@/hooks/usePushToken';
 
 // Keep the splash screen visible until we're ready
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  usePushToken();
   const colorScheme = useColorScheme();
   const { checkAuthState, isLoading: authLoading } = useAuthStore();
   const { loadCart } = useCartStore();

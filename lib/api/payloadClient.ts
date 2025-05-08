@@ -2,7 +2,7 @@ import { createClient } from 'payload-rest-client';
 import { Config } from './services/types';
 
 // Get API URL from environment variables
-const apiUrl = 'http://192.168.29.124:3000/api';
+const apiUrl = 'http://192.168.1.2:3000/api';
 
 // Define locale types if needed (can be extended later)
 type Locales = 'en' | 'es';

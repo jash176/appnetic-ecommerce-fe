@@ -1,21 +1,26 @@
 {
   "expo": {
-    "name": "appnetic-ecommerce-base",
-    "slug": "appnetic-ecommerce-base",
+    "name": "com-pavao-appnetic",
+    "slug": "com-pavao-appnetic",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "jsEngine": "hermes",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.pavao.appnetic"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "googleServicesFile": "./google-services.json",
+      "package": "com.pavao.appnetic"
     },
     "web": {
       "bundler": "metro",
@@ -37,18 +42,45 @@
         "expo-font",
         {
           "fonts": [
-            "node_modules/@expo-google-fonts/space-grotesk/Montserrat_600SemiBold.ttf",
-            "node_modules/@expo-google-fonts/space-grotesk/Montserrat_700Bold.ttf",
-            "node_modules/@expo-google-fonts/dm-sans/DMSans_400Regular.ttf",
-            "node_modules/@expo-google-fonts/dm-sans/DMSans_500Medium.ttf",
-            "node_modules/@expo-google-fonts/dm-sans/DMSans_600SemiBold.ttf",
-            "node_modules/@expo-google-fonts/dm-sans/DMSans_700Bold.ttf"
+            "node_modules/@expo-google-fonts/montserrat/600SemiBold/Montserrat_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/montserrat/700Bold/Montserrat_700Bold.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/400Regular/DMSans_400Regular.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/500Medium/DMSans_500Medium.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/600SemiBold/DMSans_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/dm-sans/700Bold/DMSans_700Bold.ttf"
           ]
+        }
+      ],
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          },
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      [
+        "expo-dev-client",
+        {
+          "launchMode": "most-recent"
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "9c01ad34-ea4b-41ce-875b-32bc54b13bd7"
+      }
+    },
+    "owner": "jash176"
   }
 }

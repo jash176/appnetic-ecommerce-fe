@@ -146,7 +146,7 @@ const handleChange = (field: string, value: any) => {
       
       const orderData = {
         orderNumber: `ORD-${Date.now()}`,
-        store: 1,
+        store: getStoreId(),
         customer: customerId,
         items: orderItems,
         subtotal,

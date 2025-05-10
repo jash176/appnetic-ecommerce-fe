@@ -38,17 +38,20 @@ const PasswordCreationModal: React.FC<PasswordCreationModalProps> = ({
     }
     
     setIsSubmitting(true);
-    
+    console.log("Customerid ; ", customerId)
     try {
       // Create a user account with the same email
-      await payloadClient.collections.users.create({
+      const createUserResponse = await payloadClient.collections.users.create({
         doc: {
           email: email,
           password: password,
           name: email.split('@')[0], // Use part of email as name (required field)
-          role: 'customer'
+          role: 'customer',
+          
         }
       });
+
+      console.log("Create user repsonse : ", createUserResponse)
       
       // If we have a customer ID, link the user to the customer
       if (customerId) {
@@ -60,7 +63,7 @@ const PasswordCreationModal: React.FC<PasswordCreationModalProps> = ({
             }
           }
         });
-        
+        console.log("User : ", usersResponse)
         if (usersResponse.docs.length > 0) {
           const userId = usersResponse.docs[0].id;
           

@@ -52,7 +52,7 @@ export default function Orders() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+console.log("User: ", user)
   const fetchOrders = async () => {
     if (!isAuthenticated || !token || !user?.id) {
       setIsLoading(false);
@@ -69,6 +69,7 @@ export default function Orders() {
           customer: {
             equals: Number(user.id) // Ensure id is a number
           },
+
           store: {
             equals: getStoreId()
           }

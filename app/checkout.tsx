@@ -14,7 +14,7 @@ import PasswordCreationModal from '@/components/ui/ecommerce/PasswordCreationMod
 import { formatCreatePayload, extractId } from '@/lib/api/utils';
 import { set } from 'lodash';
 import { getStoreId } from '@/service/storeService';
-
+import { initiateRazorpayPayment, generateRazorpayOptions, handleRazorpayResponse } from '@/service/RazorpayService';
 export default function CheckoutPage() {
   const { top } = useSafeAreaInsets();
   const { items, clearCart, getSubtotal } = useCartStore();
@@ -225,7 +225,7 @@ const handleChange = (field: string, value: any) => {
           ? formData.shippingAddress 
           : formData.billingAddress,
         paymentInfo: {
-          method: 'cod' as const,
+          method: formData.paymentMethod,
           status: 'pending' as const
         },
       };
@@ -237,24 +237,86 @@ const handleChange = (field: string, value: any) => {
       const newOrderId = extractId(orderResponse.doc);
       setOrderId(newOrderId);
       console.log("newOrderId : ", orderResponse);
-      // Clear cart after successful order
-      clearCart();
-      console.log("customerData : ", customerData?.user);
-      // Show password creation modal if user is not authenticated
-      if (!isAuthenticated && !customerData?.user) {
-        setShowPasswordModal(true);
+      
+      // Process payment based on selected payment method
+      if (formData.paymentMethod === 'razorpay') {
+        try {
+          // In a real app, you would create a Razorpay order on your backend
+          // and get the order_id. For this example, we'll use the newOrderId as a placeholder.
+          const razorpayOrderId = orderResponse.razorpayOrderId
+          
+          // Generate Razorpay options
+          const options = generateRazorpayOptions(
+            razorpayOrderId,
+            subtotal,
+            {
+              name: formData.name,
+              email: formData.email,
+              phone: formData.phone
+            }
+          );
+          
+          // Initiate Razorpay payment
+          const paymentResponse = await initiateRazorpayPayment(options);
+          
+          // Handle payment response
+          handleRazorpayResponse(
+            paymentResponse,
+            async (paymentId, orderId, signature) => {
+              // Update order with payment information
+              await payloadClient.collections.orders.update({
+                where: {
+                  id: {
+                    equals: orderResponse.doc.id,
+                  }
+                },
+                patch: {
+                  paymentInfo: {
+                    method: 'razorpay',
+                    status: 'completed',
+                    transactionId: paymentId
+                  }
+                }
+              });
+              // Clear cart after successful payment
+              clearCart();
+              // Navigate to order confirmation
+              completeCheckout(newOrderId);
+            },
+            () => {
+              // Payment failed
+              setIsSubmitting(false);
+            }
+          );
+        } catch (paymentError) {
+          console.error('Payment error:', paymentError);
+          Alert.alert('Payment Failed', 'There was an error processing your payment. Please try again.');
+          setIsSubmitting(false);
+        }
       } else {
-        router.push({
-          pathname: '/order-confirmation',
-          params: { orderId: newOrderId.toString() }
-        })
+        // COD payment - proceed as usual
+        clearCart();
+        completeCheckout(newOrderId);
       }
     } catch (error) {
       console.error('Checkout error:', error);
       Alert.alert('Checkout Failed', 'There was an error processing your order. Please try again.');
-    } finally {
       setIsSubmitting(false);
     }
+  };
+  
+  // Helper function to complete checkout and navigate
+  const completeCheckout = (orderId: number) => {
+    // Show password creation modal if user is not authenticated
+    if (!isAuthenticated && !customerData?.user) {
+      setShowPasswordModal(true);
+    } else {
+      router.push({
+        pathname: '/order-confirmation',
+        params: { orderId: orderId.toString() }
+      });
+    }
+    setIsSubmitting(false);
   };
   
   // Validate form fields
@@ -328,6 +390,7 @@ const handleChange = (field: string, value: any) => {
           formData={formData}
           onChange={handleChange}
           onBillingToggle={handleBillingToggle}
+          onPaymentMethodChange={(method) => setFormData(prev => ({ ...prev, paymentMethod: method }))}
         />
         
         <OrderSummary items={items} />
@@ -373,4 +436,4 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 60,
   }
-}); 
+});

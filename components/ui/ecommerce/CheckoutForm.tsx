@@ -15,19 +15,21 @@ export interface CheckoutFormData {
   shippingAddress: AddressFormData;
   billingAddressSameAsShipping: boolean;
   billingAddress: AddressFormData;
-  paymentMethod: string;
+  paymentMethod: 'cod' | 'razorpay';
 }
 
 interface CheckoutFormProps {
   formData: CheckoutFormData;
   onChange: (field: string, value: any) => void;
   onBillingToggle: (value: boolean) => void;
+  onPaymentMethodChange?: (method: 'cod' | 'razorpay') => void;
 }
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
   formData,
   onChange,
-  onBillingToggle
+  onBillingToggle,
+  onPaymentMethodChange
 }) => {
   const { isAuthenticated } = useAuthStore();
   const { addresses, loadAddresses } = useAddressStore();
@@ -116,6 +118,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     inputRange: [0, 1],
     outputRange: ['0deg', '180deg']
   });
+
+  const handlePaymentMethodChange = useCallback((method: 'cod' | 'razorpay') => {
+    onChange('paymentMethod', method);
+    if (onPaymentMethodChange) {
+      onPaymentMethodChange(method);
+    }
+  }, [onChange, onPaymentMethodChange]);
 
   return (
     <View>
@@ -246,10 +255,31 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       <View style={styles.section}>
         <ThemedText style={styles.sectionTitle}>Payment Method</ThemedText>
 
-        <View style={[styles.paymentOption, formData.paymentMethod === 'cod' && styles.selectedPayment]}>
-          <Ionicons name="cash-outline" size={22} color="#4a6eb5" style={styles.paymentIcon} />
-          <ThemedText style={styles.paymentOptionText}>Cash on Delivery (COD)</ThemedText>
-        </View>
+        <TouchableOpacity 
+          style={[styles.paymentOption, formData.paymentMethod === 'cod' && styles.selectedPayment]}
+          onPress={() => handlePaymentMethodChange('cod')}
+        >
+          <View style={styles.paymentOptionContent}>
+            <Ionicons name="cash-outline" size={24} color="#333" />
+            <ThemedText style={styles.paymentOptionText}>Cash on Delivery (COD)</ThemedText>
+          </View>
+          {formData.paymentMethod === 'cod' && (
+            <Ionicons name="checkmark-circle" size={24} color="#000" />
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.paymentOption, formData.paymentMethod === 'razorpay' && styles.selectedPayment]}
+          onPress={() => handlePaymentMethodChange('razorpay')}
+        >
+          <View style={styles.paymentOptionContent}>
+            <Ionicons name="card-outline" size={24} color="#333" />
+            <ThemedText style={styles.paymentOptionText}>Pay Online (Razorpay)</ThemedText>
+          </View>
+          {formData.paymentMethod === 'razorpay' && (
+            <Ionicons name="checkmark-circle" size={24} color="#000" />
+          )}
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -357,12 +387,16 @@ const styles = StyleSheet.create({
   paymentOption: {
     padding: 16,
     borderWidth: 1,
-    borderColor: '#dce4f0',
-    borderRadius: 10,
-    marginBottom: 8,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  paymentOptionContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   selectedPayment: {
     borderColor: '#4a6eb5',
@@ -377,4 +411,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CheckoutForm; 
+export default CheckoutForm;

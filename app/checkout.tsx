@@ -172,16 +172,11 @@ const handleChange = (field: string, value: any) => {
       
       const newOrderId = extractId(orderResponse.doc);
       setOrderId(newOrderId);
-      console.log("newOrderId : ", orderResponse);
       
       // Process payment based on selected payment method
       if (formData.paymentMethod === 'razorpay') {
         try {
-          // In a real app, you would create a Razorpay order on your backend
-          // and get the order_id. For this example, we'll use the newOrderId as a placeholder.
-          const razorpayOrderId = orderResponse.razorpayOrderId
-          
-          // Generate Razorpay options
+          const razorpayOrderId = orderResponse.doc.razorpay?.orderId || ""
           const options = generateRazorpayOptions(
             razorpayOrderId,
             subtotal,
@@ -209,7 +204,7 @@ const handleChange = (field: string, value: any) => {
                 patch: {
                   paymentInfo: {
                     method: 'razorpay',
-                    status: 'completed',
+                    status: 'pending',
                     transactionId: paymentId
                   }
                 }

@@ -1,23 +1,6 @@
-import RazorpayCheckout from 'react-native-razorpay';
+import RazorpayCheckout, { CheckoutOptions } from 'react-native-razorpay';
 import { Alert } from 'react-native';
-
-// Define the payment options interface
-export interface RazorpayOptions {
-  name: string;
-  description?: string;
-  image?: string;
-  currency: string;
-  amount: number; // in smallest currency unit (paise for INR)
-  order_id: string;
-  prefill?: {
-    email?: string;
-    contact?: string;
-    name?: string;
-  };
-  theme?: {
-    color?: string;
-  };
-}
+import Constants from 'expo-constants';
 
 // Define the payment response interface
 export interface RazorpayResponse {
@@ -28,10 +11,10 @@ export interface RazorpayResponse {
 
 /**
  * Initialize Razorpay payment
- * @param options Payment options
+ * @param options Checkout options
  * @returns Promise with payment response
  */
-export const initiateRazorpayPayment = (options: RazorpayOptions): Promise<RazorpayResponse> => {
+export const initiateRazorpayPayment = (options: CheckoutOptions): Promise<RazorpayResponse> => {
   return new Promise((resolve, reject) => {
     RazorpayCheckout.open(options)
       .then((data: RazorpayResponse) => {
@@ -60,14 +43,14 @@ export const generateRazorpayOptions = (
     email: string;
     phone: string;
   }
-): RazorpayOptions => {
+): CheckoutOptions => {
   // Convert amount to paise (smallest currency unit for INR)
   const amountInPaise = Math.round(amount * 100);
-  
   return {
-    name: 'Your Store Name',
+    name: process.env.EXPO_PUBLIC_STORE_NAME || "Appnectic",
     description: `Payment for order #${orderId}`,
     currency: 'INR',
+    key: Constants.expoConfig?.extra?.razorpayApiKey,
     amount: amountInPaise,
     order_id: orderId, // This should be generated from your backend
     prefill: {

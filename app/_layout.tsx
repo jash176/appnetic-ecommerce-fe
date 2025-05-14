@@ -74,6 +74,8 @@ export default function RootLayout() {
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
+              <Stack.Screen name="checkout" />
+              <Stack.Screen name="shipping-addresses" />
             </Stack>
             <StatusBar style="dark" />
           </LoadingProvider>

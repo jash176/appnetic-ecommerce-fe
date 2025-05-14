@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -14,16 +14,19 @@ import { formatCreatePayload, extractId } from '@/lib/api/utils';
 import { set } from 'lodash';
 import { getStoreId } from '@/service/storeService';
 import { initiateRazorpayPayment, generateRazorpayOptions, handleRazorpayResponse } from '@/service/RazorpayService';
+import ProcessingPaymentModal from '@/components/ui/ecommerce/ProcessingPaymentModal';
+import { pollOrderStatus } from '@/utils/functions';
 export default function CheckoutPage() {
   const { top } = useSafeAreaInsets();
   const { items, clearCart, getSubtotal } = useCartStore();
   const { user, isAuthenticated } = useAuthStore();
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showProcessingModal, setShowProcessingModal] = useState(false);
   const [customerData, setCustomerData] = useState<any>(null);
   const [orderId, setOrderId] = useState<number | null>(null);
-  
+
   // Form state for checkout
   const [formData, setFormData] = useState<CheckoutFormData>({
     name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.firstName || '',
@@ -53,44 +56,55 @@ export default function CheckoutPage() {
     paymentMethod: 'cod'
   });
 
-const handleChange = (field: string, value: any) => {
-  setFormData(prev => {
-    const updatedData = { ...prev };
+  const handleChange = (field: string, value: any) => {
+    setFormData(prev => {
+      const updatedData = { ...prev };
 
-    // Update the original field
-    set(updatedData, field, value);
+      // Update the original field
+      set(updatedData, field, value);
 
-    // If billing is same as shipping and it's a shipping field, also update billing field
-    // if (prev.billingAddressSameAsShipping && field.startsWith('shippingAddress.')) {
-    //   const billingField = field.replace('shippingAddress.', 'billingAddress.');
-    //   set(updatedData, billingField, value);
-    // }
+      // If billing is same as shipping and it's a shipping field, also update billing field
+      // if (prev.billingAddressSameAsShipping && field.startsWith('shippingAddress.')) {
+      //   const billingField = field.replace('shippingAddress.', 'billingAddress.');
+      //   set(updatedData, billingField, value);
+      // }
 
-    return updatedData;
-  });
-};
+      return updatedData;
+    });
+  };
 
-  
-  
+
+
   // Handle toggle for billing address same as shipping
   const handleBillingToggle = (value: boolean) => {
     setFormData(prev => ({
       ...prev,
       billingAddressSameAsShipping: value,
-      billingAddress: value ? {...prev.shippingAddress} : prev.billingAddress
+      billingAddress: value ? { ...prev.shippingAddress } : prev.billingAddress
     }));
   };
-  
+
+  const onRazorpayPaymentSuccess = (newOrderId: number) => {
+    setShowProcessingModal(false);
+    clearCart();
+    completeCheckout(newOrderId);
+  }
+
+  const onRazorpayPaymentFailure = () => {
+    // Payment failed
+    setIsSubmitting(false);
+  }
+
   // Handle checkout submission
   const handleCheckout = async () => {
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Step 1: Check if customer exists or create new customer
       let customerId: number;
-      
+
       // Try to find existing customer by email
       const customersResponse = await payloadClient.collections.customers.find({
         where: {
@@ -103,7 +117,7 @@ const handleChange = (field: string, value: any) => {
         }
       });
 
-      
+
       if (customersResponse.docs.length > 0) {
         // Use existing customer
         customerId = customersResponse.docs[0].id as number;
@@ -127,13 +141,13 @@ const handleChange = (field: string, value: any) => {
         const customerResponse = await payloadClient.collections.customers.create(
           formatCreatePayload(customerData)
         );
-        
+
         console.log("customerResponse : ", customerResponse);
-        
+
         customerId = extractId(customerResponse.doc);
         setCustomerData(customerResponse.doc);
       }
-      
+
       // Step 2: Create order with customer ID
       const orderItems = items.map(item => ({
         product: item.productId,
@@ -141,9 +155,9 @@ const handleChange = (field: string, value: any) => {
         quantity: item.quantity,
         price: item.price
       }));
-      
+
       const subtotal = getSubtotal();
-      
+
       const orderData = {
         orderNumber: `ORD-${Date.now()}`,
         store: getStoreId(),
@@ -157,22 +171,22 @@ const handleChange = (field: string, value: any) => {
         currency: 'INR',
         status: 'pending' as const,
         shippingAddress: formData.shippingAddress,
-        billingAddress: formData.billingAddressSameAsShipping 
-          ? formData.shippingAddress 
+        billingAddress: formData.billingAddressSameAsShipping
+          ? formData.shippingAddress
           : formData.billingAddress,
         paymentInfo: {
           method: formData.paymentMethod,
           status: 'pending' as const
         },
       };
-      
+
       const orderResponse = await payloadClient.collections.orders.create(
         formatCreatePayload(orderData)
       );
-      
+
       const newOrderId = extractId(orderResponse.doc);
       setOrderId(newOrderId);
-      
+
       // Process payment based on selected payment method
       if (formData.paymentMethod === 'razorpay') {
         try {
@@ -186,10 +200,10 @@ const handleChange = (field: string, value: any) => {
               phone: formData.phone
             }
           );
-          
+
           // Initiate Razorpay payment
           const paymentResponse = await initiateRazorpayPayment(options);
-          
+
           // Handle payment response
           handleRazorpayResponse(
             paymentResponse,
@@ -209,10 +223,8 @@ const handleChange = (field: string, value: any) => {
                   }
                 }
               });
-              // Clear cart after successful payment
-              clearCart();
-              // Navigate to order confirmation
-              completeCheckout(newOrderId);
+              setShowProcessingModal(true);
+              pollOrderStatus(orderResponse.doc.id, () => onRazorpayPaymentSuccess(newOrderId), onRazorpayPaymentFailure)
             },
             () => {
               // Payment failed
@@ -235,7 +247,7 @@ const handleChange = (field: string, value: any) => {
       setIsSubmitting(false);
     }
   };
-  
+
   // Helper function to complete checkout and navigate
   const completeCheckout = (orderId: number) => {
     // Show password creation modal if user is not authenticated
@@ -249,7 +261,7 @@ const handleChange = (field: string, value: any) => {
     }
     setIsSubmitting(false);
   };
-  
+
   // Validate form fields
   const validateForm = () => {
     // Basic validation
@@ -257,21 +269,21 @@ const handleChange = (field: string, value: any) => {
       Alert.alert('Missing Information', 'Please fill in all required personal information.');
       return false;
     }
-    
+
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       Alert.alert('Invalid Email', 'Please enter a valid email address.');
       return false;
     }
-    
+
     // Validate shipping address
     const { name, line1, city, state, postalCode, country } = formData.shippingAddress;
     if (!name || !line1 || !city || !state || !postalCode || !country) {
       Alert.alert('Missing Address Information', 'Please fill in all required shipping address fields.');
       return false;
     }
-    
+
     // Validate billing address if different from shipping
     if (!formData.billingAddressSameAsShipping) {
       const { name, line1, city, state, postalCode, country } = formData.billingAddress;
@@ -280,14 +292,14 @@ const handleChange = (field: string, value: any) => {
         return false;
       }
     }
-    
+
     return true;
   };
-  
+
   // Handle password creation completion
   const handlePasswordCreation = () => {
     setShowPasswordModal(false);
-    
+
     setTimeout(() => {
       if (orderId) {
         router.push({
@@ -297,11 +309,11 @@ const handleChange = (field: string, value: any) => {
       }
     }, 200)
   };
-  
+
   // Skip password creation
   const handleSkipPasswordCreation = () => {
     setShowPasswordModal(false);
-    
+
     if (orderId) {
       router.push({
         pathname: '/order-confirmation',
@@ -309,33 +321,33 @@ const handleChange = (field: string, value: any) => {
       });
     }
   };
-  
+
   return (
     <View style={[styles.container, { paddingTop: top }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <ThemedText type="heading">Checkout</ThemedText>
         </View>
-        
-        <CheckoutForm 
+
+        <CheckoutForm
           formData={formData}
           onChange={handleChange}
           onBillingToggle={handleBillingToggle}
           onPaymentMethodChange={(method) => setFormData(prev => ({ ...prev, paymentMethod: method }))}
         />
-        
+
         <OrderSummary items={items} />
-        
+
         <View style={styles.checkoutButton}>
-          <Button 
-            title="PLACE ORDER" 
+          <Button
+            title="PLACE ORDER"
             onPress={handleCheckout}
             loading={isSubmitting}
             fullWidth
           />
         </View>
       </ScrollView>
-      
+
       <PasswordCreationModal
         visible={showPasswordModal}
         email={formData.email}
@@ -343,6 +355,8 @@ const handleChange = (field: string, value: any) => {
         onComplete={handlePasswordCreation}
         onSkip={handleSkipPasswordCreation}
       />
+
+      <ProcessingPaymentModal visible={showProcessingModal} />
     </View>
   );
 }

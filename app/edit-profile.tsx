@@ -71,6 +71,11 @@ export default function EditProfileScreen() {
     }));
   };
   
+  // Handle navigation back to profile
+  const navigateToProfile = () => {
+    router.navigate('/(tabs)/profile');
+  };
+  
   // Save profile changes
   const handleSave = async () => {
     if (!user || !token) {
@@ -131,7 +136,7 @@ export default function EditProfileScreen() {
       await checkAuthState();
       
       Alert.alert('Success', 'Profile updated successfully!');
-      router.back();
+      navigateToProfile();
       
     } catch (error: any) {
       console.error('Error updating profile:', error);
@@ -147,7 +152,7 @@ export default function EditProfileScreen() {
     return (
       <View style={[styles.container, { paddingTop: top }]}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.backButton} onPress={navigateToProfile}>
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
           <ThemedText style={styles.title}>Edit Profile</ThemedText>
@@ -166,7 +171,7 @@ export default function EditProfileScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={navigateToProfile}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <ThemedText style={styles.title}>Edit Profile</ThemedText>

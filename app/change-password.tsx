@@ -28,6 +28,11 @@ export default function ChangePasswordScreen() {
     confirmPassword: '',
   });
   
+  // Handle navigation back to profile
+  const navigateToProfile = () => {
+    router.navigate('/(tabs)/profile');
+  };
+  
   // Handle form changes
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -87,7 +92,7 @@ export default function ChangePasswordScreen() {
         Alert.alert(
           'Success', 
           'Password changed successfully!',
-          [{ text: 'OK', onPress: () => router.back() }]
+          [{ text: 'OK', onPress: () => navigateToProfile() }]
         );
       } catch (apiError: any) {
         // Handle specific API errors
@@ -110,7 +115,7 @@ export default function ChangePasswordScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={navigateToProfile}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <ThemedText style={styles.title}>Change Password</ThemedText>
@@ -167,7 +172,7 @@ export default function ChangePasswordScreen() {
         
         <TouchableOpacity 
           style={styles.cancelButton}
-          onPress={() => router.back()}
+          onPress={navigateToProfile}
         >
           <ThemedText style={styles.cancelText}>Cancel</ThemedText>
         </TouchableOpacity>

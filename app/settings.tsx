@@ -64,6 +64,12 @@ export default function SettingsScreen() {
   const appVersion = Application.nativeApplicationVersion || '1.0.0';
   const buildVersion = Application.nativeBuildVersion || '1';
   
+  // Custom back handler to ensure proper navigation
+  const handleBackPress = () => {
+    // Navigate to the profile tab since settings is typically accessed from there
+    router.navigate('/(tabs)/profile');
+  };
+  
   // Load saved settings from AsyncStorage
   useEffect(() => {
     const loadSettings = async () => {
@@ -202,7 +208,7 @@ export default function SettingsScreen() {
     return (
       <View style={[styles.container, { paddingTop: top }]}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
           <ThemedText style={styles.title}>Settings</ThemedText>
@@ -218,7 +224,7 @@ export default function SettingsScreen() {
   return (
     <View style={[styles.container, { paddingTop: top }]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <ThemedText style={styles.title}>Settings</ThemedText>

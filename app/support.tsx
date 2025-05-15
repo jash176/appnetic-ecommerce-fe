@@ -26,9 +26,19 @@ export default function SupportScreen() {
   const { top } = useSafeAreaInsets();
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
   
+  // Handler for back navigation
+  const handleBackPress = () => {
+    // Navigate to the profile tab since support is typically accessed from there
+    router.navigate('/(tabs)/profile');
+  };
+  
   // Toggle FAQ expansion
   const toggleFaq = (id: string) => {
-    setExpandedFaq(expandedFaq === id ? null : id);
+    if (expandedFaq === id) {
+      setExpandedFaq(null);
+    } else {
+      setExpandedFaq(id);
+    }
   };
   
   // List of FAQs
@@ -129,7 +139,7 @@ export default function SupportScreen() {
   return (
     <View style={[styles.container, { paddingTop: top }]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <ThemedText style={styles.title}>Help & Support</ThemedText>

@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '@/components/ThemedText';
 import Button from '@/components/ui/Button';
 import { useAuthStore } from '@/store/authStore';
-import { router, Stack } from 'expo-router';
+import { router } from 'expo-router';
 import FormField from '@/components/ui/FormField';
 
 export default function Login() {
@@ -36,102 +36,99 @@ export default function Login() {
   };
 
   return (
-    <>
-      <Stack.Screen options={{ title: 'Sign In', headerBackTitle: 'Back' }} />
-      <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
-        <KeyboardAvoidingView
-          style={styles.keyboardAvoidView}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.header}>
-              <Ionicons name="lock-closed-outline" size={60} color="#000" />
-              <ThemedText style={styles.title}>Welcome Back</ThemedText>
-              <ThemedText style={styles.subtitle}>
-                Sign in to your account to continue
-              </ThemedText>
-            </View>
+          <View style={styles.header}>
+            <Ionicons name="lock-closed-outline" size={60} color="#000" />
+            <ThemedText style={styles.title}>Welcome Back</ThemedText>
+            <ThemedText style={styles.subtitle}>
+              Sign in to your account to continue
+            </ThemedText>
+          </View>
 
-            {error && (
-              <View style={styles.errorContainer}>
-                <ThemedText style={styles.errorText}>{error}</ThemedText>
-                <TouchableOpacity onPress={clearError} style={styles.errorButton}>
-                  <Ionicons name="close-circle" size={20} color="#FF3B30" />
-                </TouchableOpacity>
-              </View>
-            )}
-
-            <View style={styles.form}>
-              {/* Email Field */}
-              <View style={styles.formField}>
-                <ThemedText style={styles.label}>Email</ThemedText>
-                <View style={styles.inputContainer}>
-                  <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
-                  <TextInput
-                    style={styles.input}
-                    value={email}
-                    onChangeText={setEmail}
-                    placeholder="Enter your email"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                  />
-                </View>
-              </View>
-
-              {/* Password Field */}
-              <View style={styles.formField}>
-                <ThemedText style={styles.label}>Password</ThemedText>
-                <View style={styles.inputContainer}>
-                  <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
-                  <TextInput
-                    style={styles.input}
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholder="Enter your password"
-                    secureTextEntry={!showPassword}
-                    autoCapitalize="none"
-                  />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.passwordToggle}>
-                    <Ionicons
-                      name={showPassword ? "eye-off-outline" : "eye-outline"}
-                      size={20}
-                      color="#666"
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <TouchableOpacity 
-                style={styles.forgotPassword}
-                onPress={() => router.push('/forgot-password')}
-              >
-                <ThemedText style={styles.forgotPasswordText}>Forgot Password?</ThemedText>
+          {error && (
+            <View style={styles.errorContainer}>
+              <ThemedText style={styles.errorText}>{error}</ThemedText>
+              <TouchableOpacity onPress={clearError} style={styles.errorButton}>
+                <Ionicons name="close-circle" size={20} color="#FF3B30" />
               </TouchableOpacity>
+            </View>
+          )}
 
-              <Button
-                title="Sign In"
-                onPress={handleLogin}
-                fullWidth
-                loading={isLoading}
-                style={styles.loginButton}
-              />
+          <View style={styles.form}>
+            {/* Email Field */}
+            <View style={styles.formField}>
+              <ThemedText style={styles.label}>Email</ThemedText>
+              <View style={styles.inputContainer}>
+                <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Enter your email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+            </View>
 
-              <View style={styles.registerContainer}>
-                <ThemedText style={styles.registerText}>Don't have an account? </ThemedText>
-                <TouchableOpacity onPress={() => router.push('/register')}>
-                  <ThemedText style={styles.registerLink}>Sign Up</ThemedText>
+            {/* Password Field */}
+            <View style={styles.formField}>
+              <ThemedText style={styles.label}>Password</ThemedText>
+              <View style={styles.inputContainer}>
+                <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Enter your password"
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.passwordToggle}>
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color="#666"
+                  />
                 </TouchableOpacity>
               </View>
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </>
+
+            <TouchableOpacity 
+              style={styles.forgotPassword}
+              onPress={() => router.push('/forgot-password')}
+            >
+              <ThemedText style={styles.forgotPasswordText}>Forgot Password?</ThemedText>
+            </TouchableOpacity>
+
+            <Button
+              title="Sign In"
+              onPress={handleLogin}
+              fullWidth
+              loading={isLoading}
+              style={styles.loginButton}
+            />
+
+            <View style={styles.registerContainer}>
+              <ThemedText style={styles.registerText}>Don't have an account? </ThemedText>
+              <TouchableOpacity onPress={() => router.push('/register')}>
+                <ThemedText style={styles.registerLink}>Sign Up</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 

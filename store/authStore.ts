@@ -3,8 +3,8 @@ import payloadClient, { createAuthenticatedClient } from '@/lib/api/payloadClien
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Storage keys
-export const AUTH_TOKEN_KEY = 'auth_token';
-export const USER_DATA_KEY = 'user_data';
+const AUTH_TOKEN_KEY = 'auth_token';
+const USER_DATA_KEY = 'user_data';
 
 interface User {
   id: string;

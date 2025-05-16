@@ -28,13 +28,13 @@ const Profile = () => {
     {
       title: 'Shipping Addresses',
       icon: 'location-outline',
-      onPress: () => router.push('/addresses'),
+      onPress: () => router.push('/shipping-addresses'),
     },
-    {
-      title: 'Payment Methods',
-      icon: 'card-outline',
-      onPress: () => router.push('/payment-methods'),
-    },
+    // {
+    //   title: 'Payment Methods',
+    //   icon: 'card-outline',
+    //   onPress: () => router.push('/payment-methods'),
+    // },
     {
       title: 'Settings',
       icon: 'settings-outline',

@@ -1,5 +1,13 @@
-import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, Alert } from 'react-native'
-import React, { useEffect } from 'react'
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Platform,
+} from 'react-native'
+import React from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuthStore } from '@/store/authStore'
 import Button from '@/components/ui/Button'
@@ -8,17 +16,15 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-// Define menu item type with properly typed icon names
 type MenuItem = {
-  title: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  onPress: () => void;
+  title: string
+  icon: keyof typeof Ionicons.glyphMap
+  onPress: () => void
 }
 
 const Profile = () => {
   const { user, isAuthenticated, logout, isLoading } = useAuthStore()
 
-  // Example menu items for the profile screen
   const menuItems: MenuItem[] = [
     {
       title: 'My Orders',
@@ -28,12 +34,7 @@ const Profile = () => {
     {
       title: 'Shipping Addresses',
       icon: 'location-outline',
-      onPress: () => router.push('/addresses'),
-    },
-    {
-      title: 'Payment Methods',
-      icon: 'card-outline',
-      onPress: () => router.push('/payment-methods'),
+      onPress: () => router.push('/shipping-addresses'),
     },
     {
       title: 'Settings',
@@ -41,55 +42,38 @@ const Profile = () => {
       onPress: () => router.push('/settings'),
     },
     {
-      title: 'Help & Support',
+      title: 'FAQs',
       icon: 'help-circle-outline',
       onPress: () => router.push('/support'),
     },
   ]
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        onPress: async () => {
+          const success = await logout()
+          if (!success) Alert.alert('Error', 'Failed to logout. Please try again.')
         },
-        {
-          text: 'Logout',
-          onPress: async () => {
-            const success = await logout()
-            if (!success) {
-              Alert.alert('Error', 'Failed to logout. Please try again.')
-            }
-          },
-          style: 'destructive',
-        },
-      ]
-    )
+        style: 'destructive',
+      },
+    ])
   }
 
-  const handleLogin = () => {
-    router.push('/login')
-  }
+  const handleLogin = () => router.push('/login')
 
-  // If not authenticated, show login prompt
   if (!isAuthenticated) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loginContainer}>
           <Ionicons name="person-circle-outline" size={100} color="#ccc" />
-          <ThemedText style={styles.loginTitle}>Sign in to your account</ThemedText>
+          <ThemedText style={styles.loginTitle}>Welcome!</ThemedText>
           <ThemedText style={styles.loginSubtitle}>
-            Sign in to view your profile, orders, and more
+            Sign in to access your orders, addresses, and more.
           </ThemedText>
-          <Button
-            title="Sign In"
-            onPress={handleLogin}
-            fullWidth
-            style={styles.loginButton}
-          />
+          <Button title="Sign In" onPress={handleLogin} fullWidth style={styles.loginButton} />
           <TouchableOpacity onPress={() => router.push('/register')}>
             <ThemedText style={styles.registerText}>Don't have an account? Register</ThemedText>
           </TouchableOpacity>
@@ -101,59 +85,63 @@ const Profile = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header with profile info */}
-        <View style={styles.header}>
-          <View style={styles.profileInfo}>
-            <View style={styles.avatarContainer}>
+        {/* Profile Header */}
+        <View style={styles.card}>
+          <View style={styles.profileSection}>
+            <View style={styles.avatar}>
               <Text style={styles.avatarText}>
                 {user?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
               </Text>
             </View>
-            <View style={styles.userInfo}>
-              <ThemedText style={styles.userName}>
+            <View style={{ marginLeft: 14 }}>
+              <Text style={styles.name}>
                 {user?.firstName && user?.lastName
                   ? `${user.firstName} ${user.lastName}`
                   : user?.email}
-              </ThemedText>
-              <ThemedText style={styles.userEmail}>{user?.email}</ThemedText>
+              </Text>
+              <Text style={styles.email}>{user?.email}</Text>
             </View>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.editButton}
             onPress={() => router.push('/edit-profile')}
           >
-            <ThemedText style={styles.editButtonText}>Edit</ThemedText>
+            <Ionicons name="create-outline" size={18} color="#000" />
+            <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Menu items */}
-        <View style={styles.menuContainer}>
+        {/* Menu */}
+        <View style={styles.menuWrapper}>
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={index}
               style={styles.menuItem}
+              activeOpacity={0.7}
               onPress={item.onPress}
             >
-              <View style={styles.menuIconContainer}>
-                <Ionicons name={item.icon} size={22} color="#000" />
+              <View style={styles.menuIconWrapper}>
+                <Ionicons name={item.icon} size={22} color="#333" />
               </View>
-              <ThemedText style={styles.menuTitle}>{item.title}</ThemedText>
-              <Ionicons name="chevron-forward" size={18} color="#ccc" />
+              <Text style={styles.menuText}>{item.title}</Text>
+              <Ionicons name="chevron-forward" size={18} color="#aaa" />
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Logout button */}
+        {/* Logout */}
         <Button
           title="Logout"
           onPress={handleLogout}
           variant="outline"
           loading={isLoading}
-          style={styles.logoutButton}
+          style={styles.logoutBtn}
         />
-        <ThemedText onPress={() => {
-          AsyncStorage.clear()
-        }}>Clear Data</ThemedText>
+
+        {/* Clear Cache */}
+        <TouchableOpacity onPress={() => AsyncStorage.clear()}>
+          <Text style={styles.clearData}>Clear App Cache</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   )
@@ -161,111 +149,134 @@ const Profile = () => {
 
 export default Profile
 
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8F9FA',
     paddingHorizontal: 16,
   },
-  header: {
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 18,
+    marginTop: 24,
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 20,
+    alignItems: 'center',
+    ...Platform.select({
+      android: { elevation: 4 },
+      ios: {
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+      },
+    }),
   },
-  profileInfo: {
+  profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  avatarContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#f0f0f0',
+  avatar: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#E0E0E0',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: '700',
+    color: '#333',
   },
-  userInfo: {
-    marginLeft: 15,
-  },
-  userName: {
+  name: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 4,
+    color: '#222',
   },
-  userEmail: {
+  email: {
     fontSize: 14,
     color: '#666',
+    marginTop: 2,
   },
   editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    borderRadius: 6,
+    backgroundColor: '#F2F2F2',
   },
   editButtonText: {
+    marginLeft: 6,
     fontSize: 14,
     color: '#000',
   },
-  menuContainer: {
-    marginTop: 20,
+  menuWrapper: {
+    marginTop: 24,
     backgroundColor: '#fff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    borderRadius: 12,
+    overflow: 'hidden',
+    ...Platform.select({
+      android: { elevation: 2 },
+      ios: {
+        shadowColor: '#000',
+        shadowOpacity: 0.05,
+        shadowOffset: { width: 0, height: 1 },
+        shadowRadius: 2,
+      },
+    }),
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 18,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#F0F0F0',
   },
-  menuIconContainer: {
-    width: 40,
-    height: 40,
+  menuIconWrapper: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#F3F3F3',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-    borderRadius: 20,
     marginRight: 12,
   },
-  menuTitle: {
+  menuText: {
     flex: 1,
     fontSize: 16,
+    color: '#222',
   },
-  logoutButton: {
-    marginTop: 30,
+  logoutBtn: {
+    marginTop: 32,
+  },
+  clearData: {
+    textAlign: 'center',
+    fontSize: 13,
+    color: '#888',
+    marginTop: 12,
     marginBottom: 40,
+    textDecorationLine: 'underline',
   },
   loginContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   loginTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
     marginTop: 20,
     marginBottom: 10,
-    textAlign: 'center',
   },
   loginSubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#666',
     textAlign: 'center',
     marginBottom: 30,
@@ -275,7 +286,8 @@ const styles = StyleSheet.create({
   },
   registerText: {
     color: '#000',
+    fontSize: 14,
     textDecorationLine: 'underline',
-    marginTop: 10,
   },
 })
+

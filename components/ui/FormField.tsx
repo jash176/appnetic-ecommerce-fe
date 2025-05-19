@@ -29,6 +29,7 @@ const FormField = memo(({
       keyboardType={keyboardType}
       autoCapitalize={autoCapitalize}
       secureTextEntry={secureTextEntry}
+      placeholderTextColor="#aaa"
     />
   </View>
 ));

@@ -1,18 +1,41 @@
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image } from 'react-native'
-import React from 'react'
-import { useCartStore, Product } from '@/store/cartStore'
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image, TextInput } from 'react-native'
+import React, { useState } from 'react'
+import { useCartStore } from '@/store/cartStore'
 import { ThemedText } from '@/components/ThemedText'
 import { Ionicons } from '@expo/vector-icons'
 import Button from '@/components/ui/Button'
 import GenericScrollView from '@/components/ui/GenericScrollView'
 import { router } from 'expo-router'
-import { getFullImageUrl } from '@/utils/functions'
+import { formatPrice, getFullImageUrl } from '@/utils/functions'
+import { useCart } from '@/lib/api/hooks/useCart'
+import { Discount, Media, Product } from '@/lib/api/services/types'
 
-const Cart = () => {
-  const { items, removeItem, updateQuantity, getSubtotal, clearCart } = useCartStore()
+const CartScreen = () => {
+  const { removeItem, clearCart } = useCartStore()
+
+  const { cart, addToCart, removeFromCart, fetchCart, applyPromo } = useCart()
+
+  const [refreshing, setRefreshing] = useState(false)
+  const [promoCode, setPromoCode] = useState("");
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [promoError, setPromoError] = useState("");
+
+  const onRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await fetchCart()
+    } finally {
+      setRefreshing(false)
+    }
+  }
 
   const handleCheckout = () => {
     router.push('/checkout');
+  };
+
+  const handleApplyPromo = () => {
+    // Dummy logic for now, replace with real validation if needed
+    applyPromo(promoCode)
   };
 
   const renderEmptyCart = () => (
@@ -23,102 +46,149 @@ const Cart = () => {
     </View>
   )
 
-  const renderCartItem = ({ item }: { item: Product }) => (
-    <View style={styles.cartItem}>
-      <Image 
-        source={{ uri: getFullImageUrl(item.image as string) }} 
-        style={styles.itemImage}
-      />
-      <View style={styles.itemInfo}>
-        <ThemedText type="title" numberOfLines={1}>{item.productTitle}</ThemedText>
-        <ThemedText>Rs. {item.price.toFixed(2)}</ThemedText>
-        {item.variant && <ThemedText style={styles.variant}>Size: {item.variant}</ThemedText>}
-        
-        <View style={styles.quantityContainer}>
-          <TouchableOpacity 
-            style={styles.quantityButton}
-            onPress={() => {
-              if (item.quantity > 1) {
-                updateQuantity(item.productId, item.quantity - 1)
-              }
-            }}
-          >
-            <ThemedText style={styles.quantityButtonText}>-</ThemedText>
-          </TouchableOpacity>
-          
-          <ThemedText style={styles.quantity}>{item.quantity}</ThemedText>
-          
-          <TouchableOpacity 
-            style={styles.quantityButton}
-            onPress={() => updateQuantity(item.productId, item.quantity + 1)}
-          >
-            <ThemedText style={styles.quantityButtonText}>+</ThemedText>
-          </TouchableOpacity>
-        </View>
-      </View>
-      
-      <TouchableOpacity 
-        style={styles.removeButton}
-        onPress={() => removeItem(item.productId)}
-      >
-        <Ionicons name="close" size={20} color="#999" />
-      </TouchableOpacity>
-    </View>
-  )
+  const renderCartItem = ({ item }: {
+    item: {
+      product: number | Product;
+      variant?: string | null;
+      quantity: number;
+      price?: number | null;
+      id?: string | null;
+    }
+  }) => {
+    const product = item.product as Product;
+    const images = product.images && product.images[0].image as Media;
+    return (
+      <View style={styles.cartItem}>
+        <Image
+          source={{ uri: getFullImageUrl(images?.filename ?? "") }}
+          style={styles.itemImage}
+        />
+        <View style={styles.itemInfo}>
+          <ThemedText type="title" numberOfLines={1}>{product.title}</ThemedText>
+          <ThemedText>Rs. {product.price.toFixed(2)}</ThemedText>
+          {item.variant && <ThemedText style={styles.variant}>Size: {item.variant}</ThemedText>}
 
-  if (items.length === 0) {
-    return renderEmptyCart()
+          <View style={styles.quantityContainer}>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => {
+                removeFromCart({
+                  productId: product.id,
+                  variant: item.variant as string
+                })
+              }}
+            >
+              <ThemedText style={styles.quantityButtonText}>-</ThemedText>
+            </TouchableOpacity>
+
+            <ThemedText style={styles.quantity}>{item.quantity}</ThemedText>
+
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => addToCart({
+                productId: product.id,
+                variant: item.variant as string
+              })}
+            >
+              <ThemedText style={styles.quantityButtonText}>+</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={styles.removeButton}
+          onPress={() => removeItem(product.id)}
+        >
+          <Ionicons name="close" size={20} color="#999" />
+        </TouchableOpacity>
+      </View>
+    )
   }
+
+  if (!cart) return renderEmptyCart()
 
   return (
     <View style={styles.container}>
-      <GenericScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
-        <View style={styles.header}>
-          <ThemedText type="heading">Shopping Cart</ThemedText>
-        </View>
-          <TouchableOpacity onPress={clearCart}>
-            <ThemedText style={styles.clearText}>Clear All</ThemedText>
-          </TouchableOpacity>
-        
-        <FlatList
-          data={items}
-          renderItem={renderCartItem}
-          keyExtractor={item => item.productId.toString()}
-          scrollEnabled={false}
+      <View style={styles.header}>
+        <ThemedText type="heading">Shopping Cart</ThemedText>
+      </View>
+      <View style={styles.promoContainer}>
+        <TextInput
+          style={styles.promoInput}
+          placeholder="Enter promo code"
+          value={promoCode}
+          onChangeText={setPromoCode}
+          editable={!promoApplied}
         />
-        
-        <View style={styles.summaryContainer}>
-          <ThemedText type="title">Order Summary</ThemedText>
-          
-          <View style={styles.summaryRow}>
-            <ThemedText>Subtotal</ThemedText>
-            <ThemedText>Rs. {getSubtotal().toFixed(2)}</ThemedText>
+        <TouchableOpacity
+          style={styles.promoButton}
+          onPress={handleApplyPromo}
+          disabled={promoApplied}
+        >
+          <ThemedText style={styles.promoButtonText}>{promoApplied ? "Applied" : "Apply"}</ThemedText>
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        data={cart.items}
+        renderItem={renderCartItem}
+        keyExtractor={item => item.product.toString()}
+        scrollEnabled={false}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        ListHeaderComponent={() => (
+          <View>
+            <TouchableOpacity onPress={clearCart}>
+              <ThemedText style={styles.clearText}>Clear All</ThemedText>
+            </TouchableOpacity>
           </View>
-          
-          <View style={styles.summaryRow}>
-            <ThemedText>Shipping</ThemedText>
-            <ThemedText>Rs. 0.00</ThemedText>
+        )}
+        ListFooterComponent={() => (
+          <View>
+            <View style={styles.summaryContainer}>
+              <ThemedText type="title">Order Summary</ThemedText>
+
+              <View style={styles.summaryRow}>
+                <ThemedText>Subtotal</ThemedText>
+                <ThemedText>{formatPrice(cart.subtotal ?? 0)}</ThemedText>
+              </View>
+
+              <View style={styles.summaryRow}>
+                <ThemedText>Shipping</ThemedText>
+                <ThemedText>Rs. 0.00</ThemedText>
+              </View>
+
+              {cart.appliedDiscounts?.map((discount, index) => {
+                const discountObj = discount as Discount
+return(
+                <View style={styles.summaryRow}>
+                <ThemedText>{discountObj.code}</ThemedText>
+                <ThemedText>{formatPrice(discountObj?.value ?? 0)}</ThemedText>
+              </View>
+              )})}
+
+              <View style={[styles.summaryRow, styles.totalRow]}>
+                <ThemedText type="title">Total</ThemedText>
+                <ThemedText type="title">{formatPrice(cart.total ?? 0)}</ThemedText>
+              </View>
+            </View>
+
+            <View style={styles.checkoutButton}>
+              <Button
+                title="CHECKOUT"
+                onPress={handleCheckout}
+                fullWidth
+              />
+            </View>
           </View>
-          
-          <View style={[styles.summaryRow, styles.totalRow]}>
-            <ThemedText type="title">Total</ThemedText>
-            <ThemedText type="title">Rs. {getSubtotal().toFixed(2)}</ThemedText>
-          </View>
-        </View>
-        
-        <View style={styles.checkoutButton}>
-          <Button 
-            title="CHECKOUT" 
-            onPress={handleCheckout}
-            fullWidth
-          />
-        </View>
-      </GenericScrollView>
+        )}
+        ListEmptyComponent={renderEmptyCart}
+      />
     </View>
   )
 }
 
-export default Cart
+export default CartScreen
 
 const styles = StyleSheet.create({
   container: {
@@ -216,5 +286,40 @@ const styles = StyleSheet.create({
   },
   checkoutButton: {
     marginBottom: 100,
+  },
+  promoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  promoInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    padding: 10,
+    marginRight: 10,
+    backgroundColor: '#fff',
+  },
+  promoButton: {
+    backgroundColor: '#222',
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 6,
+  },
+  promoButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  promoError: {
+    color: 'red',
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  promoSuccess: {
+    color: 'green',
+    marginTop: 4,
+    marginBottom: 4,
   },
 })

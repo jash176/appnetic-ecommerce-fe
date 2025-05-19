@@ -15,7 +15,7 @@ interface SortAndFilterProps {
   onSortChange: (value: string) => void;
   onFilterChange: (value: number[]) => void;
   filterRange?: number [];
-  initialSort?: string;
+  selectedSort: string;
   initialRange?: number[]
 }
 
@@ -23,16 +23,14 @@ export default function SortAndFilter({
   onSortChange,
   onFilterChange,
   filterRange = [0, 1000],
-  initialSort = "newest",
+  selectedSort,
   initialRange = [0, 1000],
 }: SortAndFilterProps) {
   const [sortModalVisible, setSortModalVisible] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [selectedSort, setSelectedSort] = useState(initialSort);
   const [range, setRange] = useState(initialRange);
 
   const handleSortSelect = (option: {label: string, value: string}) => {
-    setSelectedSort(option.value);
     setSortModalVisible(false);
     onSortChange && onSortChange(option.value);
   };

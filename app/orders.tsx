@@ -17,6 +17,7 @@ import Button from '@/components/ui/Button';
 import { createAuthenticatedClient } from '@/lib/api/payloadClient';
 import { Order } from '@/lib/api/services/types';
 import { getStoreId } from '@/service/storeService';
+import { formatPrice } from '@/utils/functions';
 
 // Format date to a readable format
 const formatDate = (dateString: string) => {
@@ -52,7 +53,6 @@ export default function Orders() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-console.log("User: ", user)
   const fetchOrders = async () => {
     if (!isAuthenticated || !token || !user?.id) {
       setIsLoading(false);
@@ -62,12 +62,19 @@ console.log("User: ", user)
     try {
       setError(null);
       const client = createAuthenticatedClient(token);
+      const customer = await client.collections.customers.find({
+        where: {
+          user: {
+            equals: Number(user.id) // Ensure id is a number
+          }
+        }
+      });
 
       // Fetch orders associated with the current user
       const response = await client.collections.orders.find({
         where: {
           customer: {
-            equals: Number(user.id) // Ensure id is a number
+            equals: customer.docs[0].id
           },
 
           store: {
@@ -203,7 +210,7 @@ console.log("User: ", user)
 
                 <View style={styles.detailRow}>
                   <ThemedText style={styles.detailLabel}>Total:</ThemedText>
-                  <ThemedText style={styles.orderTotal}>${item.total.toFixed(2)}</ThemedText>
+                  <ThemedText style={styles.orderTotal}>{formatPrice(item.total)}</ThemedText>
                 </View>
               </View>
 

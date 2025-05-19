@@ -1,5 +1,7 @@
 import payloadClient, { createAuthenticatedClient } from "@/lib/api/payloadClient";
+import { Product } from "@/lib/api/services/types";
 import { AUTH_TOKEN_KEY } from "@/store/authStore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const getFullImageUrl = (filename: string) =>
   `https://repzaskxofppkxvcmokf.supabase.co/storage/v1/object/public/media/media/${filename}`
@@ -10,7 +12,7 @@ export const formatPrice = (price: number, currency = 'INR'): string => {
 
 export const pollOrderStatus = async (orderId: number, onSuccess: () => void, onFailure: () => void) => {
   try {
-    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
     const client = token
       ? createAuthenticatedClient(token)
       : payloadClient;
@@ -18,6 +20,7 @@ export const pollOrderStatus = async (orderId: number, onSuccess: () => void, on
       const order = await client.collections.orders.findById({
         id: orderId,
       });
+      console.log('Polling order status:', order);
       if (order.status === "completed") {
         clearInterval(poll);
         onSuccess();
@@ -29,4 +32,152 @@ export const pollOrderStatus = async (orderId: number, onSuccess: () => void, on
   } catch (error) {
     console.error('Error polling order status:', error);
   }
+}
+
+export const getOrCreateCart = async () => {
+  try {
+    const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+    let cartId = await AsyncStorage.getItem('cartId');
+    const client = token
+      ? createAuthenticatedClient(token)
+      : payloadClient;
+    if (cartId) {
+      try {
+        await client.collections.cart.findById({
+          id: Number(cartId),
+        });
+        return cartId
+      } catch (err) {
+        await AsyncStorage.removeItem('cartId') // in case it's deleted
+      }
+    }
+
+    const newCart = await client.collections.cart.create({
+      doc: {
+        store: Number(process.env.EXPO_PUBLIC_STORE_ID),
+        items: [],
+      }
+    })
+
+    cartId = newCart.doc.id.toString();
+    await AsyncStorage.setItem('cartId', cartId);
+    return cartId
+
+  } catch (error) {
+    console.error('Error getting or creating cart:', error);
+  }
+}
+
+export const addItemToCart = async (
+  {
+    productId,
+    variant
+  }: {
+    productId: number
+    variant?: string
+  }
+) => {
+  const cartId = await getOrCreateCart();
+  const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+  const client = token
+    ? createAuthenticatedClient(token)
+    : payloadClient;
+  const cart = await client.collections.cart.findById({ id: Number(cartId) });
+  console.log('Current cart:', JSON.stringify(cart.items), productId, variant)
+  const existingItemIndex = cart.items.findIndex((item) => {
+    const product = item.product as Product;
+    return product.id === Number(productId) && item.variant === variant
+  });
+  console.log('Existing item index:', existingItemIndex)
+  if (existingItemIndex > -1) {
+    // Update quantity
+    cart.items[existingItemIndex].quantity += 1
+  } else {
+    cart.items.push({ product: Number(productId), quantity: 1, variant })
+  }
+  const updated = await client.collections.cart.updateById({
+    id: Number(cartId),
+    patch: {
+      items: cart.items
+    }
+  })
+
+  console.log('Updated cart:', JSON.stringify(updated))
+
+  return updated.doc
+}
+
+export const removeItemFromCart = async (productId: number, variant?: string) => {
+  const cartId = await getOrCreateCart();
+  if (!cartId) return
+  const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+  const client = token
+    ? createAuthenticatedClient(token)
+    : payloadClient;
+  const cart = await client.collections.cart.findById({ id: Number(cartId) });
+
+  const updatedItems = cart.items
+    .map((item: any) => {
+      const product = item.product as Product;
+
+      if (product.id === Number(productId) && item.variant === variant) {
+        const newQuantity = item.quantity - 1;
+
+        // If quantity becomes 0 or less, we filter it out later
+        return newQuantity > 0
+          ? { ...item, quantity: newQuantity }
+          : null;
+      }
+
+      return item;
+    })
+    .filter(Boolean);
+
+  const updated = await client.collections.cart.updateById({
+
+    id:
+      Number(cartId),
+
+    patch: {
+      items: updatedItems,
+    }
+  })
+
+  return updated.doc
+}
+
+export const applyDiscountCode = async (code: string) => {
+  const cartId = await getOrCreateCart();
+  if (!cartId) return;
+  const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+  const client = token
+    ? createAuthenticatedClient(token)
+    : payloadClient;
+  const res = await client.collections.discounts.find({
+    where: {
+      code: {
+        equals: code,
+      },
+      active: {
+        equals: true,
+      },
+      isAutomatic: {
+        equals: false,
+      }
+    }
+  })
+  const validDiscount = res.docs[0]
+  if (!validDiscount) throw new Error('Invalid discount code')
+  const cart = await client.collections.cart.findById({ id: Number(cartId) });
+
+  const appliedDiscounts = [...cart.appliedDiscounts || [], validDiscount.id]
+
+  const updated = await client.collections.cart.updateById({
+
+    id: Number(cartId),
+    patch: {
+      appliedDiscounts,
+    }
+  })
+  return updated.doc
 }

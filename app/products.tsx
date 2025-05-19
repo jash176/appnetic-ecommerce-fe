@@ -140,9 +140,9 @@ const Products = () => {
             <ThemedText style={styles.searchHeading} type='heading'>{searchQuery || "Explore"}</ThemedText>
             <SortAndFilter
               onSortChange={handleSort}
+              selectedSort={searchFilter.sort as string}
               onFilterChange={handleFilter}
               filterRange={[0, 5000]}
-              initialSort="price_asc"
               initialRange={range}
             />
           </View>

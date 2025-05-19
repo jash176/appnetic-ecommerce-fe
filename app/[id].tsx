@@ -15,6 +15,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import * as Haptics from 'expo-haptics'
 import { useProduct } from '@/lib/api/hooks/useProducts'
 import { Media } from '@/lib/api/services/types'
+import { useCart } from '@/lib/api/hooks/useCart'
 
 const ProductDetails = () => {
   const { id } = useLocalSearchParams();
@@ -23,8 +24,8 @@ const ProductDetails = () => {
   const addButtonRef = useRef<View>(null);
   const { height: windowHeight } = useWindowDimensions();
   const [selectedVariant, setSelectedVariant] = useState(data && data.variants && data.variants.length > 0 ? data.variants[0].id : '');
-  const { addItem } = useCartStore();
-
+  // const { addItem } = useCartStore();
+  const { addToCart } = useCart()
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (!addButtonRef.current) return;
 
@@ -35,66 +36,63 @@ const ProductDetails = () => {
   };
 
   const handleAddToCart = () => {
-    if(data) {
-      const productImage = data.images ? data.images[0].image as Media : undefined
-      // Add the product to cart
-      addItem({
+    console.log("Adding to cart", selectedVariant)
+    if (data) {
+      addToCart({
         productId: data.id,
-        productTitle: data.title,
-        price: data.price,
-        image: productImage?.filename,
-      });
-      
+        variant: selectedVariant as string
+      })
+
     }
     // Provide haptic feedback
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    
+
     // Navigate to cart (optional)
     // router.push('/(tabs)/cart');
   };
 
-  
-  if(!data) return null;
-  
+
+  if (!data) return null;
+
   const hasComparePrice = data.compareAtPrice && data.compareAtPrice > data.price;
   return (
     <View style={styles.container}>
       <GenericScrollView onScroll={handleScroll} scrollEventThrottle={16}>
         <ProductImageCarousel images={data.images} showDots width={Dimensions.get("window").width} />
         <View style={styles.productDetailContainer}>
-        <View>
-          <ThemedText style={styles.productTitle}>{data.title}</ThemedText>
-          <View style={styles.priceContainer}>
-            {hasComparePrice && (
-              <ThemedText numberOfLines={1} style={styles.comparePrice}>
-                Rs. {data.compareAtPrice?.toFixed(2)}
+          <View>
+            <ThemedText style={styles.productTitle}>{data.title}</ThemedText>
+            <View style={styles.priceContainer}>
+              {hasComparePrice && (
+                <ThemedText numberOfLines={1} style={styles.comparePrice}>
+                  Rs. {data.compareAtPrice?.toFixed(2)}
+                </ThemedText>
+              )}
+              <ThemedText
+                numberOfLines={1}
+                type='title'
+                style={hasComparePrice ? styles.salePrice : undefined}
+              >
+                Rs. {data.price.toFixed(2)}
               </ThemedText>
-            )}
-            <ThemedText 
-              numberOfLines={1} 
-              type='title' 
-              style={hasComparePrice ? styles.salePrice : undefined}
-            >
-              Rs. {data.price.toFixed(2)}
-            </ThemedText>
+            </View>
+            <ThemedText type='subtitle' style={styles.productTaxStatus}>Mrp inclusive of all taxes</ThemedText>
           </View>
-          <ThemedText type='subtitle' style={styles.productTaxStatus}>Mrp inclusive of all taxes</ThemedText>
-        </View>
-        <View style={{marginTop: 48, marginBottom: 30}}>
-          <VariantSelector variantTitle='SELECT SIZES' options={data.variants} selectedValue={selectedVariant as string | undefined} onSelect={setSelectedVariant} />
-          <SizeGuide />
-        </View>
-        <View ref={addButtonRef}>
-          <Button title='ADD TO CART' onPress={handleAddToCart} fullWidth />
-        </View>
-        <View style={{marginVertical: 50}}>
-          <Accordion title='DESCRIPTION & FIT' >
-            <ThemedText>Hello World</ThemedText>
-          </Accordion>
-          <Accordion title='DELIVERY & PAYMENT' >
-            <ThemedText>Free delivery on orders above Rs. 999. Cash on delivery available.</ThemedText>
-          </Accordion>
-        </View>
+          <View style={{ marginTop: 48, marginBottom: 30 }}>
+            <VariantSelector variantTitle='SELECT SIZES' options={data.variants} selectedValue={selectedVariant as string | undefined} onSelect={setSelectedVariant} />
+            <SizeGuide />
+          </View>
+          <View ref={addButtonRef}>
+            <Button title='ADD TO CART' onPress={handleAddToCart} fullWidth />
+          </View>
+          <View style={{ marginVertical: 50 }}>
+            <Accordion title='DESCRIPTION & FIT' >
+              <ThemedText>Hello World</ThemedText>
+            </Accordion>
+            <Accordion title='DELIVERY & PAYMENT' >
+              <ThemedText>Free delivery on orders above Rs. 999. Cash on delivery available.</ThemedText>
+            </Accordion>
+          </View>
         </View>
         <Footer />
       </GenericScrollView>

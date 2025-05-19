@@ -29,7 +29,7 @@ const Footer = () => {
       </View>
       <View style={styles.footerContainer}>
         <Image source={require("../../assets/images/app-logo.png")} style={styles.appLogo} />
-        <ThemedText type="subtitle">The content of this site is copyright-protected and is the property of H & M Hennes & Mauritz AB.</ThemedText>
+        <ThemedText type="subtitle">{"The content of this site is copyright-protected and is the property of"} {process.env.EXPO_PUBLIC_STORE_NAME}</ThemedText>
       </View>
     </View>
   )

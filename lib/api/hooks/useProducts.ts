@@ -234,7 +234,7 @@ export const useCategories = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const { token } = useAuthStore();
-
+  const [totalDocs, setTotalDocs] = useState(0);
   const fetchCategories = useCallback(async () => {
     setIsLoading(true);
     setIsError(false);
@@ -251,8 +251,9 @@ export const useCategories = () => {
             equals: getStoreId()
           }
         },
-        limit: 6
+        limit: 5
       });
+      setTotalDocs(result.totalDocs);
       setData(result.docs);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -267,7 +268,7 @@ export const useCategories = () => {
     fetchCategories();
   }, [fetchCategories]);
 
-  return { data, isLoading, isError, refetch: fetchCategories };
+  return { data, isLoading, isError, refetch: fetchCategories, totalDocs };
 }
 
 export const useCateogryProductsCount = (id: string) => {

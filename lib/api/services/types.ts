@@ -81,6 +81,7 @@ export interface Config {
     pushCampaigns: PushCampaign;
     deviceTokens: DeviceToken;
     home_layouts: HomeLayout;
+    cart: Cart;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -98,9 +99,10 @@ export interface Config {
     'customer-tags': CustomerTagsSelect<false> | CustomerTagsSelect<true>;
     discounts: DiscountsSelect<false> | DiscountsSelect<true>;
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
-    'push-campaigns': PushCampaignsSelect<false> | PushCampaignsSelect<true>;
-    'device-tokens': DeviceTokensSelect<false> | DeviceTokensSelect<true>;
+    pushCampaigns: PushCampaignsSelect<false> | PushCampaignsSelect<true>;
+    deviceTokens: DeviceTokensSelect<false> | DeviceTokensSelect<true>;
     home_layouts: HomeLayoutsSelect<false> | HomeLayoutsSelect<true>;
+    cart: CartSelect<false> | CartSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -264,36 +266,36 @@ export interface Product {
   categories?: (number | Category)[] | null;
   tags?: (number | Tag)[] | null;
   images?:
-  | {
-    image: number | Media;
-    alt: string;
-    isPrimary?: boolean | null;
-    id?: string | null;
-  }[]
-  | null;
+    | {
+        image: number | Media;
+        alt: string;
+        isPrimary?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Add variants like different sizes, colors, etc.
    */
   variants?:
-  | {
-    title: string;
-    price: number;
-    compareAtPrice?: number | null;
-    sku?: string | null;
-    inventory?: {
-      trackInventory?: boolean | null;
-      quantity?: number | null;
-    };
-    options?:
     | {
-      name: string;
-      value: string;
-      id?: string | null;
-    }[]
+        title: string;
+        price: number;
+        compareAtPrice?: number | null;
+        sku?: string | null;
+        inventory?: {
+          trackInventory?: boolean | null;
+          quantity?: number | null;
+        };
+        options?:
+          | {
+              name: string;
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
     | null;
-    id?: string | null;
-  }[]
-  | null;
   sku?: string | null;
   inventory?: {
     trackInventory?: boolean | null;
@@ -350,7 +352,7 @@ export interface Order {
   id: number;
   orderNumber: string;
   store: number | Store;
-  customer: number | User;
+  customer: number | Customer;
   status: 'pending' | 'processing' | 'completed' | 'cancelled' | 'refunded';
   items: {
     product: number | Product;
@@ -414,20 +416,20 @@ export interface Customer {
   user?: (number | null) | User;
   phone?: string | null;
   addresses?:
-  | {
-    type: 'shipping' | 'billing' | 'both';
-    isDefault?: boolean | null;
-    name: string;
-    line1: string;
-    line2?: string | null;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-    phone?: string | null;
-    id?: string | null;
-  }[]
-  | null;
+    | {
+        type: 'shipping' | 'billing' | 'both';
+        isDefault?: boolean | null;
+        name: string;
+        line1: string;
+        line2?: string | null;
+        city: string;
+        state: string;
+        postalCode: string;
+        country: string;
+        phone?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   notes?: string | null;
   customerTags?: (number | CustomerTag)[] | null;
   marketingPreferences?: {
@@ -457,9 +459,13 @@ export interface CustomerTag {
 export interface Discount {
   id: number;
   /**
+   * Automatically applies at checkout if conditions are met
+   */
+  isAutomatic?: boolean | null;
+  /**
    * Discount code that customers enter at checkout
    */
-  code: string;
+  code?: string | null;
   store: number | Store;
   description?: string | null;
   discountType: 'percentage' | 'fixed' | 'shipping' | 'bxgy';
@@ -467,6 +473,16 @@ export interface Discount {
    * Percentage or fixed amount
    */
   value?: number | null;
+  buyX?: {
+    products?: (number | Product)[] | null;
+    quantity: number;
+  };
+  getY?: {
+    products?: (number | Product)[] | null;
+    quantity: number;
+    discountType: 'percentage' | 'fixed' | 'free';
+    value?: number | null;
+  };
   /**
    * Minimum purchase amount to apply discount
    */
@@ -475,6 +491,10 @@ export interface Discount {
    * Maximum number of times this discount can be used (blank for unlimited)
    */
   maxUses?: number | null;
+  /**
+   * Limit to one use per customer
+   */
+  oncePerCustomer?: boolean | null;
   /**
    * Number of times this discount has been used
    */
@@ -491,6 +511,10 @@ export interface Discount {
    * Whether this discount is currently active
    */
   active?: boolean | null;
+  /**
+   * Can be combined with other discounts
+   */
+  combinable?: boolean | null;
   /**
    * Limit discount to specific products (leave empty for all products)
    */
@@ -549,31 +573,31 @@ export interface Collection {
      * Advanced: Custom query parameters in JSON format
      */
     customQuery?:
-    | {
-      [k: string]: unknown;
-    }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
   };
   /**
    * Controls whether the collection is visible to customers
    */
   isActive?: boolean | null;
   sortOrder?:
-  | (
-    | 'manual'
-    | 'best-selling'
-    | 'price-ascending'
-    | 'price-descending'
-    | 'title-ascending'
-    | 'title-descending'
-    | 'created-descending'
-    | 'created-ascending'
-  )
-  | null;
+    | (
+        | 'manual'
+        | 'best-selling'
+        | 'price-ascending'
+        | 'price-descending'
+        | 'title-ascending'
+        | 'title-descending'
+        | 'created-descending'
+        | 'created-ascending'
+      )
+    | null;
   slug?: string | null;
   seo?: {
     title?: string | null;
@@ -584,7 +608,7 @@ export interface Collection {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "push-campaigns".
+ * via the `definition` "pushCampaigns".
  */
 export interface PushCampaign {
   id: number;
@@ -595,18 +619,19 @@ export interface PushCampaign {
    * Optional payload data to send with notification
    */
   data?:
-  | {
-    [k: string]: unknown;
-  }
-  | unknown[]
-  | string
-  | number
-  | boolean
-  | null;
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   /**
    * Optional image to display in the notification
    */
   image?: (number | null) | Media;
+  status: 'draft' | 'active' | 'sent';
   /**
    * Auto-generated delivery statistics
    */
@@ -620,7 +645,7 @@ export interface PushCampaign {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "device-tokens".
+ * via the `definition` "deviceTokens".
  */
 export interface DeviceToken {
   id: number;
@@ -649,34 +674,56 @@ export interface HomeLayout {
    * Collections to feature on the home page
    */
   featuredCollections?:
-  | {
-    collection: number | Collection;
-    /**
-     * Custom title for this collection (optional)
-     */
-    title: string;
-    description: string;
-    id?: string | null;
-  }[]
-  | null;
+    | {
+        collection: number | Collection;
+        /**
+         * Custom title for this collection (optional)
+         */
+        title: string;
+        description: string;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Individual products to feature on the home page
    */
   featuredProducts?:
-  | {
-    product: number | Product;
-    id?: string | null;
-  }[]
-  | null;
+    | {
+        product: number | Product;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Categories to feature on the home page
    */
   categoryDisplay?:
-  | {
-    category: number | Category;
+    | {
+        category: number | Category;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cart".
+ */
+export interface Cart {
+  id: number;
+  store: number | Store;
+  customer?: (number | null) | Customer;
+  items: {
+    product: number | Product;
+    variant?: string | null;
+    quantity: number;
+    price?: number | null;
     id?: string | null;
-  }[]
-  | null;
+  }[];
+  appliedDiscounts?: (number | Discount)[] | null;
+  subtotal?: number | null;
+  discountTotal?: number | null;
+  total?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -687,62 +734,66 @@ export interface HomeLayout {
 export interface PayloadLockedDocument {
   id: number;
   document?:
-  | ({
-    relationTo: 'users';
-    value: number | User;
-  } | null)
-  | ({
-    relationTo: 'media';
-    value: number | Media;
-  } | null)
-  | ({
-    relationTo: 'stores';
-    value: number | Store;
-  } | null)
-  | ({
-    relationTo: 'products';
-    value: number | Product;
-  } | null)
-  | ({
-    relationTo: 'categories';
-    value: number | Category;
-  } | null)
-  | ({
-    relationTo: 'tags';
-    value: number | Tag;
-  } | null)
-  | ({
-    relationTo: 'orders';
-    value: number | Order;
-  } | null)
-  | ({
-    relationTo: 'customers';
-    value: number | Customer;
-  } | null)
-  | ({
-    relationTo: 'customer-tags';
-    value: number | CustomerTag;
-  } | null)
-  | ({
-    relationTo: 'discounts';
-    value: number | Discount;
-  } | null)
-  | ({
-    relationTo: 'collections';
-    value: number | Collection;
-  } | null)
-  | ({
-    relationTo: 'push-campaigns';
-    value: number | PushCampaign;
-  } | null)
-  | ({
-    relationTo: 'device-tokens';
-    value: number | DeviceToken;
-  } | null)
-  | ({
-    relationTo: 'home_layouts';
-    value: number | HomeLayout;
-  } | null);
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'stores';
+        value: number | Store;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'tags';
+        value: number | Tag;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: number | Customer;
+      } | null)
+    | ({
+        relationTo: 'customer-tags';
+        value: number | CustomerTag;
+      } | null)
+    | ({
+        relationTo: 'discounts';
+        value: number | Discount;
+      } | null)
+    | ({
+        relationTo: 'collections';
+        value: number | Collection;
+      } | null)
+    | ({
+        relationTo: 'pushCampaigns';
+        value: number | PushCampaign;
+      } | null)
+    | ({
+        relationTo: 'deviceTokens';
+        value: number | DeviceToken;
+      } | null)
+    | ({
+        relationTo: 'home_layouts';
+        value: number | HomeLayout;
+      } | null)
+    | ({
+        relationTo: 'cart';
+        value: number | Cart;
+      } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
@@ -763,14 +814,14 @@ export interface PayloadPreference {
   };
   key?: string | null;
   value?:
-  | {
-    [k: string]: unknown;
-  }
-  | unknown[]
-  | string
-  | number
-  | boolean
-  | null;
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -835,36 +886,36 @@ export interface StoresSelect<T extends boolean = true> {
   logo?: T;
   description?: T;
   settings?:
-  | T
-  | {
-    currency?: T;
-    timezone?: T;
-    emailNotifications?: T;
-  };
-  businessDetails?:
-  | T
-  | {
-    phone?: T;
-    category?: T;
-    subcategory?: T;
-    address?:
     | T
     | {
-      street1?: T;
-      street2?: T;
-      city?: T;
-      state?: T;
-      postal_code?: T;
-      country?: T;
-    };
-  };
+        currency?: T;
+        timezone?: T;
+        emailNotifications?: T;
+      };
+  businessDetails?:
+    | T
+    | {
+        phone?: T;
+        category?: T;
+        subcategory?: T;
+        address?:
+          | T
+          | {
+              street1?: T;
+              street2?: T;
+              city?: T;
+              state?: T;
+              postal_code?: T;
+              country?: T;
+            };
+      };
   active?: T;
   razorpay?:
-  | T
-  | {
-    accountId?: T;
-    defaultCommissionPercent?: T;
-  };
+    | T
+    | {
+        accountId?: T;
+        defaultCommissionPercent?: T;
+      };
   storeId?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -883,48 +934,48 @@ export interface ProductsSelect<T extends boolean = true> {
   categories?: T;
   tags?: T;
   images?:
-  | T
-  | {
-    image?: T;
-    alt?: T;
-    isPrimary?: T;
-    id?: T;
-  };
+    | T
+    | {
+        image?: T;
+        alt?: T;
+        isPrimary?: T;
+        id?: T;
+      };
   variants?:
-  | T
-  | {
-    title?: T;
-    price?: T;
-    compareAtPrice?: T;
-    sku?: T;
-    inventory?:
     | T
     | {
-      trackInventory?: T;
-      quantity?: T;
-    };
-    options?:
-    | T
-    | {
-      name?: T;
-      value?: T;
-      id?: T;
-    };
-    id?: T;
-  };
+        title?: T;
+        price?: T;
+        compareAtPrice?: T;
+        sku?: T;
+        inventory?:
+          | T
+          | {
+              trackInventory?: T;
+              quantity?: T;
+            };
+        options?:
+          | T
+          | {
+              name?: T;
+              value?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   sku?: T;
   inventory?:
-  | T
-  | {
-    trackInventory?: T;
-    quantity?: T;
-  };
+    | T
+    | {
+        trackInventory?: T;
+        quantity?: T;
+      };
   seo?:
-  | T
-  | {
-    title?: T;
-    description?: T;
-  };
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -941,11 +992,11 @@ export interface CategoriesSelect<T extends boolean = true> {
   isActive?: T;
   slug?: T;
   seo?:
-  | T
-  | {
-    title?: T;
-    description?: T;
-  };
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -971,14 +1022,14 @@ export interface OrdersSelect<T extends boolean = true> {
   customer?: T;
   status?: T;
   items?:
-  | T
-  | {
-    product?: T;
-    variant?: T;
-    quantity?: T;
-    price?: T;
-    id?: T;
-  };
+    | T
+    | {
+        product?: T;
+        variant?: T;
+        quantity?: T;
+        price?: T;
+        id?: T;
+      };
   subtotal?: T;
   tax?: T;
   shipping?: T;
@@ -986,44 +1037,44 @@ export interface OrdersSelect<T extends boolean = true> {
   total?: T;
   currency?: T;
   shippingAddress?:
-  | T
-  | {
-    name?: T;
-    line1?: T;
-    line2?: T;
-    city?: T;
-    state?: T;
-    postalCode?: T;
-    country?: T;
-    phone?: T;
-  };
+    | T
+    | {
+        name?: T;
+        line1?: T;
+        line2?: T;
+        city?: T;
+        state?: T;
+        postalCode?: T;
+        country?: T;
+        phone?: T;
+      };
   billingAddress?:
-  | T
-  | {
-    name?: T;
-    line1?: T;
-    line2?: T;
-    city?: T;
-    state?: T;
-    postalCode?: T;
-    country?: T;
-    phone?: T;
-  };
+    | T
+    | {
+        name?: T;
+        line1?: T;
+        line2?: T;
+        city?: T;
+        state?: T;
+        postalCode?: T;
+        country?: T;
+        phone?: T;
+      };
   paymentInfo?:
-  | T
-  | {
-    method?: T;
-    transactionId?: T;
-    status?: T;
-  };
+    | T
+    | {
+        method?: T;
+        transactionId?: T;
+        status?: T;
+      };
   notes?: T;
   razorpay?:
-  | T
-  | {
-    orderId?: T;
-    paymentId?: T;
-    signature?: T;
-  };
+    | T
+    | {
+        orderId?: T;
+        paymentId?: T;
+        signature?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1038,28 +1089,28 @@ export interface CustomersSelect<T extends boolean = true> {
   user?: T;
   phone?: T;
   addresses?:
-  | T
-  | {
-    type?: T;
-    isDefault?: T;
-    name?: T;
-    line1?: T;
-    line2?: T;
-    city?: T;
-    state?: T;
-    postalCode?: T;
-    country?: T;
-    phone?: T;
-    id?: T;
-  };
+    | T
+    | {
+        type?: T;
+        isDefault?: T;
+        name?: T;
+        line1?: T;
+        line2?: T;
+        city?: T;
+        state?: T;
+        postalCode?: T;
+        country?: T;
+        phone?: T;
+        id?: T;
+      };
   notes?: T;
   customerTags?: T;
   marketingPreferences?:
-  | T
-  | {
-    emailMarketing?: T;
-    smsMarketing?: T;
-  };
+    | T
+    | {
+        emailMarketing?: T;
+        smsMarketing?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1080,17 +1131,34 @@ export interface CustomerTagsSelect<T extends boolean = true> {
  * via the `definition` "discounts_select".
  */
 export interface DiscountsSelect<T extends boolean = true> {
+  isAutomatic?: T;
   code?: T;
   store?: T;
   description?: T;
   discountType?: T;
   value?: T;
+  buyX?:
+    | T
+    | {
+        products?: T;
+        quantity?: T;
+      };
+  getY?:
+    | T
+    | {
+        products?: T;
+        quantity?: T;
+        discountType?: T;
+        value?: T;
+      };
   minPurchase?: T;
   maxUses?: T;
+  oncePerCustomer?: T;
   usesCount?: T;
   startDate?: T;
   endDate?: T;
   active?: T;
+  combinable?: T;
   eligibleProducts?: T;
   eligibleCategories?: T;
   eligibleCustomers?: T;
@@ -1110,30 +1178,30 @@ export interface CollectionsSelect<T extends boolean = true> {
   image?: T;
   isAutomated?: T;
   conditions?:
-  | T
-  | {
-    type?: T;
-    tags?: T;
-    categories?: T;
-    minPrice?: T;
-    maxPrice?: T;
-    customQuery?: T;
-  };
+    | T
+    | {
+        type?: T;
+        tags?: T;
+        categories?: T;
+        minPrice?: T;
+        maxPrice?: T;
+        customQuery?: T;
+      };
   isActive?: T;
   sortOrder?: T;
   slug?: T;
   seo?:
-  | T
-  | {
-    title?: T;
-    description?: T;
-  };
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "push-campaigns_select".
+ * via the `definition` "pushCampaigns_select".
  */
 export interface PushCampaignsSelect<T extends boolean = true> {
   store?: T;
@@ -1141,19 +1209,20 @@ export interface PushCampaignsSelect<T extends boolean = true> {
   description?: T;
   data?: T;
   image?: T;
+  status?: T;
   analytics?:
-  | T
-  | {
-    sentTo?: T;
-    successCount?: T;
-    errorCount?: T;
-  };
+    | T
+    | {
+        sentTo?: T;
+        successCount?: T;
+        errorCount?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "device-tokens_select".
+ * via the `definition` "deviceTokens_select".
  */
 export interface DeviceTokensSelect<T extends boolean = true> {
   user?: T;
@@ -1171,25 +1240,48 @@ export interface HomeLayoutsSelect<T extends boolean = true> {
   store?: T;
   isActive?: T;
   featuredCollections?:
-  | T
-  | {
-    collection?: T;
-    title?: T;
-    description?: T;
-    id?: T;
-  };
+    | T
+    | {
+        collection?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
   featuredProducts?:
-  | T
-  | {
-    product?: T;
-    id?: T;
-  };
+    | T
+    | {
+        product?: T;
+        id?: T;
+      };
   categoryDisplay?:
-  | T
-  | {
-    category?: T;
-    id?: T;
-  };
+    | T
+    | {
+        category?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cart_select".
+ */
+export interface CartSelect<T extends boolean = true> {
+  store?: T;
+  customer?: T;
+  items?:
+    | T
+    | {
+        product?: T;
+        variant?: T;
+        quantity?: T;
+        price?: T;
+        id?: T;
+      };
+  appliedDiscounts?: T;
+  subtotal?: T;
+  discountTotal?: T;
+  total?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1232,8 +1324,3 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Auth {
   [k: string]: unknown;
 }
-
-
-// declare module 'payload' {
-//   export interface GeneratedTypes extends Config { }
-// }

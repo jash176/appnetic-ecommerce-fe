@@ -15,6 +15,7 @@ const PAGE_SIZE = 10;
 export default function SearchScreenPage() {
   const { top: paddingTop } = useSafeAreaInsets();
   const handleSearch = (query: string) => {
+    if(query.trim().length === 0) return;
     router.push({
       pathname: "/products",
       params: {query: query}
@@ -27,7 +28,7 @@ export default function SearchScreenPage() {
   }), []);
 
   const { data, isError, refetch } = useProducts(productParams);
-  const { data: categories } = useCategories();
+  const { data: categories, totalDocs } = useCategories();
 
   // Handle retry on error
   const handleRetry = () => {
@@ -60,7 +61,7 @@ export default function SearchScreenPage() {
             initialValue={""}
           />
           <ThemedText style={styles.searchHeading} type='heading'>Categories</ThemedText>
-          <ThemedText type='title' style={styles.viewAllText} onPress={() => { }}>View all</ThemedText>
+          {totalDocs > 5 && <ThemedText type='title' style={styles.viewAllText} onPress={() => { }}>View all</ThemedText>}
           <FlatList
             data={categories}
             keyExtractor={(item, index) => `${index}-${item.id}`}

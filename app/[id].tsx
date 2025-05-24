@@ -1,4 +1,4 @@
-import { Dimensions, FlatList, StyleSheet, Text, View, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
+import { Dimensions, FlatList, StyleSheet, Text, View, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent, SafeAreaView, TouchableOpacity } from 'react-native'
 import React, { useRef, useState } from 'react'
 import ProductImageCarousel from '@/components/ui/ecommerce/ProductImageCarousel'
 import GenericScrollView from '@/components/ui/GenericScrollView'
@@ -16,6 +16,8 @@ import * as Haptics from 'expo-haptics'
 import { useProduct } from '@/lib/api/hooks/useProducts'
 import { Media } from '@/lib/api/services/types'
 import { useCart } from '@/lib/api/hooks/useCart'
+import { Ionicons } from '@expo/vector-icons'
+import CommonHeader from '@/components/ui/CommonHeader'
 
 const ProductDetails = () => {
   const { id } = useLocalSearchParams();
@@ -56,7 +58,8 @@ const ProductDetails = () => {
 
   const hasComparePrice = data.compareAtPrice && data.compareAtPrice > data.price;
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <CommonHeader title='Products' showBack onBackPress={() =>router.back()}/>
       <GenericScrollView onScroll={handleScroll} scrollEventThrottle={16}>
         <ProductImageCarousel images={data.images} showDots width={Dimensions.get("window").width} />
         <View style={styles.productDetailContainer}>
@@ -97,7 +100,7 @@ const ProductDetails = () => {
         <Footer />
       </GenericScrollView>
       <FloatingAddButton onPress={handleAddToCart} visible={!isAddButtonVisible} />
-    </View>
+    </SafeAreaView>
   )
 }
 

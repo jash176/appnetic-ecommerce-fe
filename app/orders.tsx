@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  RefreshControl
+  RefreshControl,
+  Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/ThemedText';
@@ -18,6 +19,7 @@ import { createAuthenticatedClient } from '@/lib/api/payloadClient';
 import { Order } from '@/lib/api/services/types';
 import { getStoreId } from '@/service/storeService';
 import { formatPrice } from '@/utils/functions';
+import CommonHeader from '@/components/ui/CommonHeader';
 
 // Format date to a readable format
 const formatDate = (dateString: string) => {
@@ -176,6 +178,7 @@ export default function Orders() {
   return (
     <>
       <SafeAreaView style={styles.container}>
+         <CommonHeader title='My Orders' showBack onBackPress={() =>router.back()}/>
         <FlatList
           data={orders}
           keyExtractor={(item) => item.id.toString()}
@@ -318,4 +321,5 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     alignItems: 'flex-end',
   },
+  
 }); 

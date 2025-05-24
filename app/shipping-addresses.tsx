@@ -10,6 +10,7 @@ import AddressForm, { AddressFormData } from '@/components/ui/AddressForm';
 import payloadClient from '@/lib/api/payloadClient';
 import { getStoreId } from '@/service/storeService';
 import { formatCreatePayload } from '@/lib/api/utils';
+import CommonHeader from '@/components/ui/CommonHeader';
 
 interface Address extends AddressFormData {
   id?: string;
@@ -411,12 +412,7 @@ export default function ShippingAddressesScreen() {
   if (!isAuthenticated) {
     return (
       <View style={[styles.container, { paddingTop: top }]}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <ThemedText style={styles.title}>Shipping Addresses</ThemedText>
-        </View>
+        <CommonHeader title='Shipping Addresses' showBack onBackPress={() =>router.back()}/>
         <View style={styles.centerContainer}>
           <ThemedText style={styles.messageText}>Please log in to manage your addresses</ThemedText>
           <Button

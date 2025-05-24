@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image, TextInput } from 'react-native'
-import React, { useState } from 'react'
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image, TextInput, ActivityIndicator } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cartStore'
 import { ThemedText } from '@/components/ThemedText'
 import { Ionicons } from '@expo/vector-icons'
@@ -12,13 +12,23 @@ import { Discount, Media, Product } from '@/lib/api/services/types'
 
 const CartScreen = () => {
   const { removeItem, clearCart } = useCartStore()
-
   const { cart, addToCart, removeFromCart, fetchCart, applyPromo } = useCart()
+
+  console.log("Cart State:", {
+    isUndefined: cart === undefined,
+    hasItems: (cart?.items?.length ?? 0) > 0,
+    itemsCount: cart?.items?.length,
+    items: cart?.items
+  })
 
   const [refreshing, setRefreshing] = useState(false)
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState("");
+
+  useEffect(() => {
+    fetchCart();
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true)
@@ -55,6 +65,8 @@ const CartScreen = () => {
       id?: string | null;
     }
   }) => {
+    console.log("Rendering item:", item)
+
     const product = item.product as Product;
     const images = product.images && product.images[0].image as Media;
     return (
@@ -105,102 +117,88 @@ const CartScreen = () => {
     )
   }
 
-  if (!cart) return renderEmptyCart()
+  // Remove this condition since cart is not undefined
+  // if (cart === undefined) {
+  //   return (
+  //     <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+  //       <ActivityIndicator size="large" color="#2D6CDF" />
+  //     </View>
+  //   );
+  // }
+
+  // Simplify this condition to check only for empty items
+  if (!cart?.items?.length) {
+    return renderEmptyCart();
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <ThemedText type="heading">Shopping Cart</ThemedText>
+        <ThemedText type="heading">Shopping Cart ({cart.items.length} items)</ThemedText>
       </View>
-      <View style={styles.promoContainer}>
-        <TextInput
-          style={styles.promoInput}
-          placeholder="Enter promo code"
-          value={promoCode}
-          onChangeText={setPromoCode}
-          editable={!promoApplied}
-        />
-        <TouchableOpacity
-          style={styles.promoButton}
-          onPress={handleApplyPromo}
-          disabled={promoApplied}
-        >
-          <ThemedText style={styles.promoButtonText}>{promoApplied ? "Applied" : "Apply"}</ThemedText>
-        </TouchableOpacity>
-      </View>
+
       <FlatList
         data={cart.items}
         renderItem={renderCartItem}
         keyExtractor={item => item.product.toString()}
-        scrollEnabled={false}
+        scrollEnabled={true}
         contentContainerStyle={{ paddingHorizontal: 16 }}
         refreshing={refreshing}
         onRefresh={onRefresh}
-        ListHeaderComponent={() => (
-          <View>
-            <TouchableOpacity onPress={clearCart}>
-              <ThemedText style={styles.clearText}>Clear All</ThemedText>
-            </TouchableOpacity>
-          </View>
-        )}
+        // Remove ListEmptyComponent since we handle empty state above
+        // ListEmptyComponent={renderEmptyCart}
         ListFooterComponent={() => (
           <View>
             <View style={styles.summaryContainer}>
               <ThemedText type="title">Order Summary</ThemedText>
-
               <View style={styles.summaryRow}>
                 <ThemedText>Subtotal</ThemedText>
                 <ThemedText>{formatPrice(cart.subtotal ?? 0)}</ThemedText>
               </View>
-
               <View style={styles.summaryRow}>
                 <ThemedText>Shipping</ThemedText>
                 <ThemedText>Rs. 0.00</ThemedText>
               </View>
-
               {cart.appliedDiscounts?.map((discount, index) => {
-                const discountObj = discount as Discount
-return(
-                <View style={styles.summaryRow}>
-                <ThemedText>{discountObj.code}</ThemedText>
-                <ThemedText>{formatPrice(discountObj?.value ?? 0)}</ThemedText>
-              </View>
-              )})}
-
+                const discountObj = discount as Discount;
+                return (
+                  <View style={styles.summaryRow} key={index}>
+                    <ThemedText>{discountObj.code}</ThemedText>
+                    <ThemedText>{formatPrice(discountObj?.value ?? 0)}</ThemedText>
+                  </View>
+                );
+              })}
               <View style={[styles.summaryRow, styles.totalRow]}>
                 <ThemedText type="title">Total</ThemedText>
                 <ThemedText type="title">{formatPrice(cart.total ?? 0)}</ThemedText>
               </View>
             </View>
-
             <View style={styles.checkoutButton}>
-              <Button
-                title="CHECKOUT"
-                onPress={handleCheckout}
-                fullWidth
-              />
+              <Button title="CHECKOUT" onPress={handleCheckout} fullWidth />
             </View>
           </View>
         )}
-        ListEmptyComponent={renderEmptyCart}
       />
     </View>
-  )
-}
+  );
+};
 
-export default CartScreen
+export default CartScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: "#FFF"
+    backgroundColor: "#FFF",
+    paddingHorizontal: 20,
+    paddingBottom: 0,
+    marginBottom: 0,
+    minHeight: '100%', // Ensures full height
   },
   emptyTitle: {
     marginTop: 20,

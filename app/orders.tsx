@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  RefreshControl
+  RefreshControl,
+  Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/ThemedText';
@@ -176,6 +177,12 @@ export default function Orders() {
   return (
     <>
       <SafeAreaView style={styles.container}>
+          <View style={styles.header}>
+                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                  <Ionicons name="arrow-back" size={24} color="#000" />
+                </TouchableOpacity>
+                <ThemedText style={styles.title}>My Orders</ThemedText>
+              </View>
         <FlatList
           data={orders}
           keyExtractor={(item) => item.id.toString()}
@@ -317,5 +324,19 @@ const styles = StyleSheet.create({
     borderTopColor: '#eee',
     paddingTop: 12,
     alignItems: 'flex-end',
+  },
+   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+   backButton: {
+    marginRight: 16,
+  },
+   title: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 }); 

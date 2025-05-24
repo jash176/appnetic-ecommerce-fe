@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Application from 'expo-application';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import CommonHeader from '@/components/ui/CommonHeader';
 
 // Setting types
 interface NotificationSettings {
@@ -207,12 +208,7 @@ export default function SettingsScreen() {
   if (isLoading) {
     return (
       <View style={[styles.container, { paddingTop: top }]}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <ThemedText style={styles.title}>Settings</ThemedText>
-        </View>
+         <CommonHeader title='Settings' showBack onBackPress={() =>router.back()}/>
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color="#000" />
         </View>

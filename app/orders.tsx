@@ -19,6 +19,7 @@ import { createAuthenticatedClient } from '@/lib/api/payloadClient';
 import { Order } from '@/lib/api/services/types';
 import { getStoreId } from '@/service/storeService';
 import { formatPrice } from '@/utils/functions';
+import CommonHeader from '@/components/ui/CommonHeader';
 
 // Format date to a readable format
 const formatDate = (dateString: string) => {
@@ -177,12 +178,7 @@ export default function Orders() {
   return (
     <>
       <SafeAreaView style={styles.container}>
-          <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                  <Ionicons name="arrow-back" size={24} color="#000" />
-                </TouchableOpacity>
-                <ThemedText style={styles.title}>My Orders</ThemedText>
-              </View>
+         <CommonHeader title='My Orders' showBack onBackPress={() =>router.back()}/>
         <FlatList
           data={orders}
           keyExtractor={(item) => item.id.toString()}
@@ -325,18 +321,5 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     alignItems: 'flex-end',
   },
-   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-   backButton: {
-    marginRight: 16,
-  },
-   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+  
 }); 

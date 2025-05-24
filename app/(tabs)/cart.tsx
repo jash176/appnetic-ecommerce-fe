@@ -134,7 +134,7 @@ const CartScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <ThemedText type="heading">Shopping Cart ({cart.items.length} items)</ThemedText>
+        <ThemedText type="heading">Shopping Cart</ThemedText>
       </View>
 
       <FlatList

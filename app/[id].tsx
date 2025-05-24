@@ -17,6 +17,7 @@ import { useProduct } from '@/lib/api/hooks/useProducts'
 import { Media } from '@/lib/api/services/types'
 import { useCart } from '@/lib/api/hooks/useCart'
 import { Ionicons } from '@expo/vector-icons'
+import CommonHeader from '@/components/ui/CommonHeader'
 
 const ProductDetails = () => {
   const { id } = useLocalSearchParams();
@@ -58,12 +59,7 @@ const ProductDetails = () => {
   const hasComparePrice = data.compareAtPrice && data.compareAtPrice > data.price;
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                  <Ionicons name="arrow-back" size={24} color="#000" />
-                </TouchableOpacity>
-                <ThemedText style={styles.title}>Products</ThemedText>
-              </View>
+      <CommonHeader title='Products' showBack onBackPress={() =>router.back()}/>
       <GenericScrollView onScroll={handleScroll} scrollEventThrottle={16}>
         <ProductImageCarousel images={data.images} showDots width={Dimensions.get("window").width} />
         <View style={styles.productDetailContainer}>
@@ -136,19 +132,5 @@ const styles = StyleSheet.create({
   salePrice: {
     color: '#EE3434',
     marginLeft: 10
-  },
-   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-   backButton: {
-    marginRight: 16,
-  },
-   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
   },
 })

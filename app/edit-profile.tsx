@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 import { Ionicons } from '@expo/vector-icons';
 import FormField from '@/components/ui/FormField';
 import { createAuthenticatedClient } from '@/lib/api/payloadClient';
+import CommonHeader from '@/components/ui/CommonHeader';
 
 // Extended User interface to match what's expected from the API
 interface ExtendedUser {
@@ -151,12 +152,7 @@ export default function EditProfileScreen() {
   if (isLoading) {
     return (
       <View style={[styles.container, { paddingTop: top }]}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={navigateToProfile}>
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <ThemedText style={styles.title}>Edit Profile</ThemedText>
-        </View>
+         <CommonHeader title='Settings' showBack onBackPress={navigateToProfile}/>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#000" />
         </View>
@@ -170,14 +166,7 @@ export default function EditProfileScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={navigateToProfile}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <ThemedText style={styles.title}>Edit Profile</ThemedText>
-        <View style={styles.spacer} />
-      </View>
-      
+       <CommonHeader title='Settings' showBack onBackPress={navigateToProfile}/>
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         {/* Form Fields */}
         <View style={styles.formSection}>

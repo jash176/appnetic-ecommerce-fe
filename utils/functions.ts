@@ -163,20 +163,64 @@ export const applyDiscountCode = async (code: string) => {
       },
       isAutomatic: {
         equals: false,
+      },
+      store: {
+        equals: Number(process.env.EXPO_PUBLIC_STORE_ID),
       }
     }
   })
-  const validDiscount = res.docs[0]
-  if (!validDiscount) throw new Error('Invalid discount code')
+  const validDiscount = res.docs[0];
+  if (!validDiscount) throw new Error(JSON.stringify({
+    errors: [
+      {
+        message: 'Invalid discount code',
+        code: 'INVALID_DISCOUNT_CODE',
+      }
+    ]
+  }));
   const cart = await client.collections.cart.findById({ id: Number(cartId) });
 
   const appliedDiscounts = [...cart.appliedDiscounts || [], validDiscount.id]
-
   const updated = await client.collections.cart.updateById({
 
     id: Number(cartId),
     patch: {
       appliedDiscounts,
+    }
+  })
+  return updated.doc
+}
+
+export const removeDiscountCode = async (code: string) => {
+  const cartId = await getOrCreateCart();
+  if (!cartId) return;
+  const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+  const client = token
+    ? createAuthenticatedClient(token)
+    : payloadClient;
+  const cart = await client.collections.cart.findById({ id: Number(cartId) });
+  const appliedDiscounts = cart.appliedDiscounts?.filter((discount: any) => discount.code !== code) || []
+  const updated = await client.collections.cart.updateById({
+
+    id: Number(cartId),
+    patch: {
+      appliedDiscounts,
+    }
+  })
+  return updated.doc
+}
+
+export const clearDiscountCode = async () => {
+  const cartId = await getOrCreateCart();
+  if (!cartId) return;
+  const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+  const client = token
+    ? createAuthenticatedClient(token)
+    : payloadClient;
+  const updated = await client.collections.cart.updateById({
+    id: Number(cartId),
+    patch: {
+      appliedDiscounts: [],
     }
   })
   return updated.doc

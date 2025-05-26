@@ -1,24 +1,30 @@
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image, TextInput } from 'react-native'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useCartStore } from '@/store/cartStore'
 import { ThemedText } from '@/components/ThemedText'
 import { Ionicons } from '@expo/vector-icons'
 import Button from '@/components/ui/Button'
 import GenericScrollView from '@/components/ui/GenericScrollView'
-import { router } from 'expo-router'
-import { formatPrice, getFullImageUrl } from '@/utils/functions'
+import { router, useFocusEffect } from 'expo-router'
+import { clearDiscountCode, formatPrice, getFullImageUrl } from '@/utils/functions'
 import { useCart } from '@/lib/api/hooks/useCart'
 import { Discount, Media, Product } from '@/lib/api/services/types'
 
 const CartScreen = () => {
-  const { removeItem, clearCart } = useCartStore()
+  const { clearCart } = useCartStore()
 
-  const { cart, addToCart, removeFromCart, fetchCart, applyPromo } = useCart()
+  const { cart, addToCart, removeFromCart, fetchCart, applyPromo, removePromo } = useCart()
 
   const [refreshing, setRefreshing] = useState(false)
   const [promoCode, setPromoCode] = useState("");
-  const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState("");
+
+  // Refresh cart data when component mounts and after any cart operation
+  useFocusEffect(
+    useCallback(() => {
+      fetchCart()
+    }, [])
+  )
 
   const onRefresh = async () => {
     setRefreshing(true)
@@ -33,9 +39,16 @@ const CartScreen = () => {
     router.push('/checkout');
   };
 
-  const handleApplyPromo = () => {
-    // Dummy logic for now, replace with real validation if needed
-    applyPromo(promoCode)
+  const handleApplyPromo = async () => {
+    try {
+      await applyPromo(promoCode);
+      await fetchCart(); // Refresh cart data after applying promo
+      setPromoCode("");
+      setPromoError("");
+    } catch (error: any) {
+      const parsed = JSON.parse(error.message);
+      setPromoError(parsed.errors[0].message);
+    }
   };
 
   const renderEmptyCart = () => (
@@ -45,6 +58,43 @@ const CartScreen = () => {
       <ThemedText style={styles.emptySubtitle}>Looks like you haven't added anything to your cart yet.</ThemedText>
     </View>
   )
+
+  const renderHeader = useMemo(() => {
+    return (
+      <View>
+        <View style={styles.header}>
+          <ThemedText type="heading">Shopping Cart</ThemedText>
+        </View>
+        <View style={styles.promoContainer}>
+          <TextInput
+            style={styles.promoInput}
+            placeholder="Enter promo code"
+            value={promoCode}
+            onChangeText={setPromoCode}
+          />
+          <TouchableOpacity
+            style={styles.promoButton}
+            onPress={handleApplyPromo}
+          >
+            <ThemedText style={styles.promoButtonText}>{"Apply"}</ThemedText>
+          </TouchableOpacity>
+        </View>
+        {promoError && <ThemedText style={styles.promoError}>{promoError}</ThemedText>}
+        <TouchableOpacity
+          onPress={async () => {
+            try {
+              clearCart();
+              await fetchCart(); // Refresh cart data after clearing
+            } catch (error) {
+              console.error('Error clearing cart:', error);
+            }
+          }}
+        >
+          <ThemedText style={styles.clearText}>Clear All</ThemedText>
+        </TouchableOpacity>
+      </View>
+    )
+  }, [promoCode])
 
   const renderCartItem = ({ item }: {
     item: {
@@ -71,11 +121,16 @@ const CartScreen = () => {
           <View style={styles.quantityContainer}>
             <TouchableOpacity
               style={styles.quantityButton}
-              onPress={() => {
-                removeFromCart({
-                  productId: product.id,
-                  variant: item.variant as string
-                })
+              onPress={async () => {
+                try {
+                  await removeFromCart({
+                    productId: product.id,
+                    variant: item.variant as string
+                  });
+                  await fetchCart(); // Refresh cart data after removing item
+                } catch (error) {
+                  console.error('Error removing item:', error);
+                }
               }}
             >
               <ThemedText style={styles.quantityButtonText}>-</ThemedText>
@@ -85,10 +140,17 @@ const CartScreen = () => {
 
             <TouchableOpacity
               style={styles.quantityButton}
-              onPress={() => addToCart({
-                productId: product.id,
-                variant: item.variant as string
-              })}
+              onPress={async () => {
+                try {
+                  await addToCart({
+                    productId: product.id,
+                    variant: item.variant as string
+                  });
+                  await fetchCart(); // Refresh cart data after adding item
+                } catch (error) {
+                  console.error('Error adding item:', error);
+                }
+              }}
             >
               <ThemedText style={styles.quantityButtonText}>+</ThemedText>
             </TouchableOpacity>
@@ -97,7 +159,17 @@ const CartScreen = () => {
 
         <TouchableOpacity
           style={styles.removeButton}
-          onPress={() => removeItem(product.id)}
+          onPress={async () => {
+            try {
+              await removeFromCart({
+                productId: product.id,
+                variant: item.variant as string
+              });
+              await fetchCart(); // Refresh cart data after removing item
+            } catch (error) {
+              console.error('Error removing item:', error);
+            }
+          }}
         >
           <Ionicons name="close" size={20} color="#999" />
         </TouchableOpacity>
@@ -105,44 +177,25 @@ const CartScreen = () => {
     )
   }
 
-  if (!cart) return renderEmptyCart()
+  useEffect(() => {
+    // When cart becomes empty, remove all discount codes
+    if (cart && cart.items.length === 0 && cart.appliedDiscounts && cart.appliedDiscounts.length > 0) {
+      clearDiscountCode()
+    }
+  }, [cart?.items.length]);
+
+  if (!cart || cart.items.length <= 0) return renderEmptyCart();
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <ThemedText type="heading">Shopping Cart</ThemedText>
-      </View>
-      <View style={styles.promoContainer}>
-        <TextInput
-          style={styles.promoInput}
-          placeholder="Enter promo code"
-          value={promoCode}
-          onChangeText={setPromoCode}
-          editable={!promoApplied}
-        />
-        <TouchableOpacity
-          style={styles.promoButton}
-          onPress={handleApplyPromo}
-          disabled={promoApplied}
-        >
-          <ThemedText style={styles.promoButtonText}>{promoApplied ? "Applied" : "Apply"}</ThemedText>
-        </TouchableOpacity>
-      </View>
       <FlatList
         data={cart.items}
         renderItem={renderCartItem}
         keyExtractor={item => item.product.toString()}
-        scrollEnabled={false}
         contentContainerStyle={{ paddingHorizontal: 16 }}
         refreshing={refreshing}
         onRefresh={onRefresh}
-        ListHeaderComponent={() => (
-          <View>
-            <TouchableOpacity onPress={clearCart}>
-              <ThemedText style={styles.clearText}>Clear All</ThemedText>
-            </TouchableOpacity>
-          </View>
-        )}
+        ListHeaderComponent={renderHeader}
         ListFooterComponent={() => (
           <View>
             <View style={styles.summaryContainer}>
@@ -160,12 +213,29 @@ const CartScreen = () => {
 
               {cart.appliedDiscounts?.map((discount, index) => {
                 const discountObj = discount as Discount
-return(
-                <View style={styles.summaryRow}>
-                <ThemedText>{discountObj.code}</ThemedText>
-                <ThemedText>{formatPrice(discountObj?.value ?? 0)}</ThemedText>
-              </View>
-              )})}
+                return (
+                  <View key={discountObj.id} style={styles.summaryRow}>
+                    <View style={styles.discountRow}>
+                      <ThemedText>{discountObj.code}</ThemedText>
+                      <TouchableOpacity
+                        onPress={async () => {
+                          if (discountObj.code) {
+                            try {
+                              await removePromo(discountObj.code);
+                              await fetchCart(); // Refresh cart data after removing promo
+                            } catch (error) {
+                              console.error('Error removing promo:', error);
+                            }
+                          }
+                        }}
+                        style={styles.removeDiscountButton}>
+                        <Ionicons name="close-circle-outline" size={20} color="#999" />
+                      </TouchableOpacity>
+                    </View>
+                    <ThemedText>{formatPrice(discountObj?.value ?? 0)}</ThemedText>
+                  </View>
+                )
+              })}
 
               <View style={[styles.summaryRow, styles.totalRow]}>
                 <ThemedText type="title">Total</ThemedText>
@@ -182,7 +252,6 @@ return(
             </View>
           </View>
         )}
-        ListEmptyComponent={renderEmptyCart}
       />
     </View>
   )
@@ -321,5 +390,13 @@ const styles = StyleSheet.create({
     color: 'green',
     marginTop: 4,
     marginBottom: 4,
+  },
+  discountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  removeDiscountButton: {
+    marginLeft: 8,
+    padding: 2,
   },
 })

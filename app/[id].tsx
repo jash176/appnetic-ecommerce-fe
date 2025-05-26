@@ -1,5 +1,5 @@
 import { Dimensions, FlatList, StyleSheet, Text, View, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import ProductImageCarousel from '@/components/ui/ecommerce/ProductImageCarousel'
 import GenericScrollView from '@/components/ui/GenericScrollView'
 import { ThemedText } from '@/components/ThemedText'
@@ -23,9 +23,22 @@ const ProductDetails = () => {
   const [isAddButtonVisible, setIsAddButtonVisible] = useState(false);
   const addButtonRef = useRef<View>(null);
   const { height: windowHeight } = useWindowDimensions();
-  const [selectedVariant, setSelectedVariant] = useState(data && data.variants && data.variants.length > 0 ? data.variants[0].id : '');
-  // const { addItem } = useCartStore();
-  const { addToCart } = useCart()
+  const [selectedVariant, setSelectedVariant] = useState('');
+  const { addToCart } = useCart();
+
+  // Set the first available variant when data loads
+  useEffect(() => {
+    if (data?.variants) {
+      const firstAvailableVariant = data.variants.find(variant => 
+        !variant.inventory?.trackInventory || 
+        (variant.inventory?.trackInventory && variant.inventory?.quantity && variant.inventory?.quantity > 0)
+      );
+      if (firstAvailableVariant?.id) {
+        setSelectedVariant(firstAvailableVariant.id);
+      }
+    }
+  }, [data]);
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (!addButtonRef.current) return;
 

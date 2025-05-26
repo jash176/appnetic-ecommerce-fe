@@ -105,6 +105,8 @@ const CartScreen = () => {
       id?: string | null;
     }
   }) => {
+    console.log("Rendering item:", item)
+
     const product = item.product as Product;
     const images = product.images && product.images[0].image as Media;
     return (
@@ -200,17 +202,14 @@ const CartScreen = () => {
           <View>
             <View style={styles.summaryContainer}>
               <ThemedText type="title">Order Summary</ThemedText>
-
               <View style={styles.summaryRow}>
                 <ThemedText>Subtotal</ThemedText>
                 <ThemedText>{formatPrice(cart.subtotal ?? 0)}</ThemedText>
               </View>
-
               <View style={styles.summaryRow}>
                 <ThemedText>Shipping</ThemedText>
                 <ThemedText>Rs. 0.00</ThemedText>
               </View>
-
               {cart.appliedDiscounts?.map((discount, index) => {
                 const discountObj = discount as Discount
                 return (
@@ -242,34 +241,32 @@ const CartScreen = () => {
                 <ThemedText type="title">{formatPrice(cart.total ?? 0)}</ThemedText>
               </View>
             </View>
-
             <View style={styles.checkoutButton}>
-              <Button
-                title="CHECKOUT"
-                onPress={handleCheckout}
-                fullWidth
-              />
+              <Button title="CHECKOUT" onPress={handleCheckout} fullWidth />
             </View>
           </View>
         )}
       />
     </View>
-  )
-}
+  );
+};
 
-export default CartScreen
+export default CartScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: "#FFF"
+    backgroundColor: "#FFF",
+    paddingHorizontal: 20,
+    paddingBottom: 0,
+    marginBottom: 0,
+    minHeight: '100%', // Ensures full height
   },
   emptyTitle: {
     marginTop: 20,

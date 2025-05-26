@@ -150,17 +150,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: '100%',
     paddingVertical: 32,
   },
   centered: {
-    width: '100%',
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    width: '100%',
   },
   formCard: {
+    alignSelf: 'center',
     width: '90%',
     maxWidth: 400,
     backgroundColor: '#fff',
@@ -177,12 +180,13 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: 28,
+    fontSize:24,
     fontWeight: 'bold',
     marginTop: 18,
     marginBottom: 6,
     color: '#222',
     textAlign: 'center',
+    fontFamily: Platform.select({ ios: 'System', android: 'sans-serif' }),
   },
   subtitle: {
     fontSize: 16,

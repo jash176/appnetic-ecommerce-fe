@@ -15,7 +15,7 @@ const GenericScrollView = (props: GenericScrollViewProps) => {
   return (
     <ScrollView 
       style={styles.container}
-      contentContainerStyle={[{ paddingTop, paddingBottom: 90 }, contentContainerStyle]}
+      contentContainerStyle={[{  paddingBottom: 90 }, contentContainerStyle]}
       onScroll={onScroll}
       scrollEventThrottle={scrollEventThrottle}
     >

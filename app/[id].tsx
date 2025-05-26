@@ -1,5 +1,5 @@
-import { Dimensions, FlatList, StyleSheet, Text, View, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent, SafeAreaView, TouchableOpacity } from 'react-native'
-import React, { useRef, useState } from 'react'
+import { Dimensions, StyleSheet, View, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent, SafeAreaView, TouchableOpacity } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
 import ProductImageCarousel from '@/components/ui/ecommerce/ProductImageCarousel'
 import GenericScrollView from '@/components/ui/GenericScrollView'
 import { ThemedText } from '@/components/ThemedText'
@@ -8,15 +8,11 @@ import VariantSelector from '@/components/ui/ecommerce/VariantSelector'
 import SizeGuide from '@/components/ui/ecommerce/SizeGuide'
 import Footer from '@/components/ui/Footer'
 import Accordion from '@/components/ui/Accordion'
-import ProductCard from '@/components/ui/ecommerce/ProductCard'
 import FloatingAddButton from '@/components/ui/ecommerce/FloatingAddButton'
-import { useCartStore } from '@/store/cartStore'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Haptics from 'expo-haptics'
 import { useProduct } from '@/lib/api/hooks/useProducts'
-import { Media } from '@/lib/api/services/types'
 import { useCart } from '@/lib/api/hooks/useCart'
-import { Ionicons } from '@expo/vector-icons'
 import CommonHeader from '@/components/ui/CommonHeader'
 
 const ProductDetails = () => {
@@ -25,9 +21,22 @@ const ProductDetails = () => {
   const [isAddButtonVisible, setIsAddButtonVisible] = useState(false);
   const addButtonRef = useRef<View>(null);
   const { height: windowHeight } = useWindowDimensions();
-  const [selectedVariant, setSelectedVariant] = useState(data && data.variants && data.variants.length > 0 ? data.variants[0].id : '');
-  // const { addItem } = useCartStore();
-  const { addToCart } = useCart()
+  const [selectedVariant, setSelectedVariant] = useState('');
+  const { addToCart } = useCart();
+
+  // Set the first available variant when data loads
+  useEffect(() => {
+    if (data?.variants) {
+      const firstAvailableVariant = data.variants.find(variant => 
+        !variant.inventory?.trackInventory || 
+        (variant.inventory?.trackInventory && variant.inventory?.quantity && variant.inventory?.quantity > 0)
+      );
+      if (firstAvailableVariant?.id) {
+        setSelectedVariant(firstAvailableVariant.id);
+      }
+    }
+  }, [data]);
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (!addButtonRef.current) return;
 

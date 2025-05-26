@@ -34,7 +34,13 @@ const VariantSelector = ({
   onSelect,
   variantTitle,
 }: VariantSelectorProps) => {
-  if(!options || options.length <= 0) return null;
+  if (!options || options.length <= 0) return null;
+
+  const isVariantAvailable = (variant: VariantOption) => {
+    return !variant.inventory?.trackInventory || 
+      (variant.inventory?.trackInventory && variant.inventory?.quantity && variant.inventory?.quantity > 0);
+  };
+
   return (
     <View style={styles.container}>
       {variantTitle && (
@@ -47,7 +53,9 @@ const VariantSelector = ({
           const row = Math.floor(index / BOX_PER_ROW);
           const col = index % BOX_PER_ROW;
           const isFirstCol = col === 0;
-          const isFirsRow = row === 0
+          const isFirsRow = row === 0;
+          const isAvailable = isVariantAvailable(size);
+
           return (
             <TouchableOpacity
               key={index}
@@ -58,15 +66,16 @@ const VariantSelector = ({
                 selectedValue === size.id && styles.selectedBox,
               ]}
               onPress={() => {
-                if(size.id) {
-                  onSelect(size.id)
+                if (size.id && isAvailable) {
+                  onSelect(size.id);
                 }
               }}
-              activeOpacity={0.7}
+              disabled={!isAvailable}
+              activeOpacity={isAvailable ? 0.7 : 1}
             >
-              <ThemedText>{size.title}</ThemedText>
+              <ThemedText style={!isAvailable && styles.unavailableTitle}>{size.title}</ThemedText>
             </TouchableOpacity>
-          )
+          );
         })}
       </View>
     </View>
@@ -113,6 +122,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
   },
+  unavailableTitle: {
+    textDecorationLine: 'line-through',
+  }
 });
 
-export default VariantSelector; 
+export default VariantSelector;

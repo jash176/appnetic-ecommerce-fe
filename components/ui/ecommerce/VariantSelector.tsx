@@ -63,11 +63,11 @@ const VariantSelector = ({
                 styles.box,
                 isFirstCol && { borderLeftWidth: 1 },
                 isFirsRow && { borderTopWidth: 1 },
-                selectedValue === size.id && styles.selectedBox,
+                selectedValue === size.title && styles.selectedBox,
               ]}
               onPress={() => {
                 if (size.id && isAvailable) {
-                  onSelect(size.id);
+                  onSelect(size.title);
                 }
               }}
               disabled={!isAvailable}

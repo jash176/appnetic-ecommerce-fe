@@ -31,8 +31,8 @@ const ProductDetails = () => {
         !variant.inventory?.trackInventory || 
         (variant.inventory?.trackInventory && variant.inventory?.quantity && variant.inventory?.quantity > 0)
       );
-      if (firstAvailableVariant?.id) {
-        setSelectedVariant(firstAvailableVariant.id);
+      if (firstAvailableVariant?.title) {
+        setSelectedVariant(firstAvailableVariant.title);
       }
     }
   }, [data]);

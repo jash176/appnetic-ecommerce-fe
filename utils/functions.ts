@@ -83,7 +83,6 @@ export const addItemToCart = async (
     ? createAuthenticatedClient(token)
     : payloadClient;
   const cart = await client.collections.cart.findById({ id: Number(cartId) });
-  console.log('Current cart:', JSON.stringify(cart.items), productId, variant)
   const existingItemIndex = cart.items.findIndex((item) => {
     const product = item.product as Product;
     return product.id === Number(productId) && item.variant === variant
@@ -221,6 +220,22 @@ export const clearDiscountCode = async () => {
     id: Number(cartId),
     patch: {
       appliedDiscounts: [],
+    }
+  })
+  return updated.doc
+}
+
+export const clearCartItems = async () => {
+  const cartId = await getOrCreateCart();
+  if (!cartId) return;
+  const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+  const client = token
+    ? createAuthenticatedClient(token)
+    : payloadClient;
+  const updated = await client.collections.cart.updateById({
+    id: Number(cartId),
+    patch: {
+      items: [],
     }
   })
   return updated.doc

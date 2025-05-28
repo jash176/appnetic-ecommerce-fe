@@ -1,4 +1,4 @@
-import { addItemToCart, applyDiscountCode, getOrCreateCart, removeDiscountCode, removeItemFromCart } from "@/utils/functions";
+import { addItemToCart, applyDiscountCode, clearCartItems, getOrCreateCart, removeDiscountCode, removeItemFromCart } from "@/utils/functions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import payloadClient, { createAuthenticatedClient } from "../payloadClient";
 import { AUTH_TOKEN_KEY } from "@/store/authStore";
@@ -62,9 +62,17 @@ export const useCart = () => {
     }
   }
 
+  const clearCart = async () => {
+     try {
+      await clearCartItems();
+    } catch (error) {
+      throw error
+    }
+  }
+
   useEffect(() => {
     fetchCart()
   }, [])
 
-  return { cart: items, addToCart, removeFromCart, fetchCart, applyPromo, removePromo }
+  return { cart: items, addToCart, removeFromCart, fetchCart, applyPromo, removePromo, clearCart }
 }

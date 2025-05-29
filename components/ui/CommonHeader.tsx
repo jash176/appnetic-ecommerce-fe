@@ -1,31 +1,31 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
-import React from 'react'
-import { ThemedText } from '../ThemedText'
-import { Ionicons } from '@expo/vector-icons'
-import { router } from 'expo-router'
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import React from "react";
+import { ThemedText } from "../ThemedText";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 interface CommonHeaderProps {
-  title: string
-  showBack?: boolean
-  onBackPress?: () => void
-  rightComponent?: React.ReactNode
-  leftComponent?: React.ReactNode
+  title: string;
+  showBack?: boolean;
+  onBackPress?: () => void;
+  rightComponent?: React.ReactNode;
+  leftComponent?: React.ReactNode;
 }
 
-const CommonHeader = ({ 
-  title, 
-  showBack = true, 
-  onBackPress, 
+const CommonHeader = ({
+  title,
+  showBack = true,
+  onBackPress,
   rightComponent,
-  leftComponent
+  leftComponent,
 }: CommonHeaderProps) => {
   const handleBack = () => {
     if (onBackPress) {
-      onBackPress()
+      onBackPress();
     } else {
-      router.back()
+      router.back();
     }
-  }
+  };
 
   return (
     <View style={styles.header}>
@@ -37,45 +37,45 @@ const CommonHeader = ({
         )}
         {leftComponent}
       </View>
-      
-      <ThemedText style={styles.title} numberOfLines={1}>{title}</ThemedText>
-      
+
+      <ThemedText style={styles.title} numberOfLines={1}>
+        {title}
+      </ThemedText>
+
       {rightComponent && (
-        <View style={styles.rightSection}>
-          {rightComponent}
-        </View>
+        <View style={styles.rightSection}>{rightComponent}</View>
       )}
     </View>
-  )
-}
+  );
+};
 
-export default CommonHeader
+export default CommonHeader;
 
 const styles = StyleSheet.create({
-     header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
-   backButton: {
+  backButton: {
     marginRight: 16,
   },
-   title: {
+  title: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
- 
+
   leftSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     minWidth: 40,
   },
   rightSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     minWidth: 40,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
-})
+});

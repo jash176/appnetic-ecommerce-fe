@@ -74,7 +74,7 @@ export default function EditProfileScreen() {
   
   // Handle navigation back to profile
   const navigateToProfile = () => {
-    router.navigate('/(tabs)/profile');
+    router.back();
   };
   
   // Save profile changes

@@ -68,7 +68,7 @@ export default function SettingsScreen() {
   // Custom back handler to ensure proper navigation
   const handleBackPress = () => {
     // Navigate to the profile tab since settings is typically accessed from there
-    router.navigate('/(tabs)/profile');
+    router.back()
   };
   
   // Load saved settings from AsyncStorage

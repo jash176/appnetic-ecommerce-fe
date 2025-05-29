@@ -46,6 +46,11 @@ const Profile = () => {
       icon: 'help-circle-outline',
       onPress: () => router.push('/support'),
     },
+    {
+      title: 'Privacy Policy',
+      icon: 'shield-checkmark-outline',
+      onPress: () => router.push('/privacy-policy'),
+    },
   ]
 
   const handleLogout = async () => {

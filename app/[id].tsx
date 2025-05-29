@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, View, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent, SafeAreaView, TouchableOpacity } from 'react-native'
+import { Dimensions, StyleSheet, View, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent, SafeAreaView } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import ProductImageCarousel from '@/components/ui/ecommerce/ProductImageCarousel'
 import GenericScrollView from '@/components/ui/GenericScrollView'
@@ -68,8 +68,8 @@ const ProductDetails = () => {
   const hasComparePrice = data.compareAtPrice && data.compareAtPrice > data.price;
   return (
     <SafeAreaView style={styles.container}>
-      <CommonHeader title='Products' showBack onBackPress={() =>router.back()}/>
       <GenericScrollView onScroll={handleScroll} scrollEventThrottle={16}>
+      <CommonHeader title='Products' showBack onBackPress={() =>router.back()}/>
         <ProductImageCarousel images={data.images} showDots width={Dimensions.get("window").width} />
         <View style={styles.productDetailContainer}>
           <View>

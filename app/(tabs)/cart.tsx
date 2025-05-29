@@ -1,10 +1,9 @@
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image, TextInput } from 'react-native'
+import { StyleSheet, View, FlatList, TouchableOpacity, Image, TextInput } from 'react-native'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useCartStore } from '@/store/cartStore'
 import { ThemedText } from '@/components/ThemedText'
 import { Ionicons } from '@expo/vector-icons'
 import Button from '@/components/ui/Button'
-import GenericScrollView from '@/components/ui/GenericScrollView'
 import { router, useFocusEffect } from 'expo-router'
 import { clearDiscountCode, formatPrice, getFullImageUrl } from '@/utils/functions'
 import { useCart } from '@/lib/api/hooks/useCart'
@@ -63,7 +62,7 @@ const CartScreen = () => {
     return (
       <View>
         <View style={styles.header}>
-          <ThemedText type="heading">Shopping Cart</ThemedText>
+          <ThemedText style={styles.title} type="heading">Shopping Bag</ThemedText>
         </View>
         <View style={styles.promoContainer}>
           <TextInput
@@ -105,8 +104,6 @@ const CartScreen = () => {
       id?: string | null;
     }
   }) => {
-    console.log("Rendering item:", item)
-
     const product = item.product as Product;
     const images = product.images && product.images[0].image as Media;
     return (
@@ -282,6 +279,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
     marginTop: 40,
+  },
+  title: {
+    textTransform: 'uppercase',
   },
   clearText: {
     color: '#999',

@@ -30,7 +30,7 @@ export default function ChangePasswordScreen() {
   
   // Handle navigation back to profile
   const navigateToProfile = () => {
-    router.navigate('/(tabs)/profile');
+    router.back();
   };
   
   // Handle form changes

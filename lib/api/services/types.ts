@@ -110,8 +110,12 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'privacy-policies': PrivacyPolicy;
+  };
+  globalsSelect: {
+    'privacy-policies': PrivacyPoliciesSelect<false> | PrivacyPoliciesSelect<true>;
+  };
   locale: null;
   user: User & {
     collection: 'users';
@@ -155,7 +159,7 @@ export interface User {
    */
   role: 'admin' | 'store-owner' | 'store-staff' | 'customer';
   phone?: string | null;
-  avatar?: (number | null) | Media;
+  isDeleted?: boolean | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -436,6 +440,7 @@ export interface Customer {
     emailMarketing?: boolean | null;
     smsMarketing?: boolean | null;
   };
+  isDeleted?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -512,7 +517,7 @@ export interface Discount {
    */
   active?: boolean | null;
   /**
-   * Can be combined with other discounts
+   * Whether this discount can be combined with other discounts
    */
   combinable?: boolean | null;
   /**
@@ -713,13 +718,15 @@ export interface Cart {
   id: number;
   store: number | Store;
   customer?: (number | null) | Customer;
-  items: {
-    product: number | Product;
-    variant?: string | null;
-    quantity: number;
-    price?: number | null;
-    id?: string | null;
-  }[];
+  items?:
+    | {
+        product: number | Product;
+        variant?: string | null;
+        quantity: number;
+        price?: number | null;
+        id?: string | null;
+      }[]
+    | null;
   appliedDiscounts?: (number | Discount)[] | null;
   subtotal?: number | null;
   discountTotal?: number | null;
@@ -845,7 +852,7 @@ export interface UsersSelect<T extends boolean = true> {
   stores?: T;
   role?: T;
   phone?: T;
-  avatar?: T;
+  isDeleted?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1111,6 +1118,7 @@ export interface CustomersSelect<T extends boolean = true> {
         emailMarketing?: T;
         smsMarketing?: T;
       };
+  isDeleted?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1316,6 +1324,42 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "privacy-policies".
+ */
+export interface PrivacyPolicy {
+  id: number;
+  title: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "privacy-policies_select".
+ */
+export interface PrivacyPoliciesSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

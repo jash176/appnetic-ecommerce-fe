@@ -15,6 +15,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import LoginRegistrationComponent from '@/components/ui/LoginRegistrationComponent'
 
 type MenuItem = {
   title: string
@@ -23,7 +24,7 @@ type MenuItem = {
 }
 
 const Profile = () => {
-  const { user, isAuthenticated, logout, isLoading } = useAuthStore()
+  const { user, isAuthenticated, logout, isLoading, login } = useAuthStore()
 
   const menuItems: MenuItem[] = [
     {
@@ -67,23 +68,16 @@ const Profile = () => {
     ])
   }
 
-  const handleLogin = () => router.push('/login')
+  const handleLogin = async (email: string, password: string) => {
+    const success = await login(email, password);
+    if (success) {
+      router.push('/(tabs)');
+    }
+  }
 
   if (!isAuthenticated) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loginContainer}>
-          <Ionicons name="person-circle-outline" size={100} color="#ccc" />
-          <ThemedText style={styles.loginTitle}>Welcome!</ThemedText>
-          <ThemedText style={styles.loginSubtitle}>
-            Sign in to access your orders, addresses, and more.
-          </ThemedText>
-          <Button title="Sign In" onPress={handleLogin} fullWidth style={styles.loginButton} />
-          <TouchableOpacity onPress={() => router.push('/register')}>
-            <ThemedText style={styles.registerText}>Don't have an account? Register</ThemedText>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      <LoginRegistrationComponent onLogin={handleLogin} onRegister={() => {}} />
     )
   }
 
@@ -170,15 +164,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    ...Platform.select({
-      android: { elevation: 4 },
-      ios: {
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-      },
-    }),
   },
   profileSection: {
     flexDirection: 'row',
@@ -225,15 +210,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     overflow: 'hidden',
-    ...Platform.select({
-      android: { elevation: 2 },
-      ios: {
-        shadowColor: '#000',
-        shadowOpacity: 0.05,
-        shadowOffset: { width: 0, height: 1 },
-        shadowRadius: 2,
-      },
-    }),
   },
   menuItem: {
     flexDirection: 'row',

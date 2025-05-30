@@ -1,17 +1,11 @@
 import { create } from 'zustand';
 import payloadClient, { createAuthenticatedClient } from '@/lib/api/payloadClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { User } from '@/lib/api/services/types';
 
 // Storage keys
 export const AUTH_TOKEN_KEY = 'auth_token';
 export const USER_DATA_KEY = 'user_data';
-
-interface User {
-  id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-}
 
 interface AuthState {
   user: User | null;
@@ -25,6 +19,7 @@ interface AuthState {
   logout: () => Promise<boolean>;
   register: (email: string, password: string, name: string, phone?: string) => Promise<void>;
   checkAuthState: () => Promise<void>;
+  checkEmailExists: (email: string) => Promise<boolean>;
   clearError: () => void;
 }
 
@@ -75,7 +70,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const token = get().token;
       if (token) {
         const client = createAuthenticatedClient(token);
-        await client.collections.users.logout({});
+        await client.collections.users.logout();
       }
       
       // Clear auth state
@@ -154,7 +149,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Verify token is still valid with the server
       try {
         const client = createAuthenticatedClient(storedToken);
-        const response = await client.collections.users.me({});
+        const response = await client.collections.users.me();
         
         // Update user data if it's changed
         set({
@@ -174,6 +169,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await get().logout();
       set({ isLoading: false });
     }
+  },
+
+  checkEmailExists: async (email: string): Promise<boolean> => {
+    const response = await payloadClient.collections.users.find({
+      where: {
+        email: {
+          equals: email,
+        },
+      },
+      limit: 1,
+    });
+    if (response.docs && response.docs.length > 0) {
+      return true; // Email exists
+    }
+    return false;
   },
   
   clearError: () => {

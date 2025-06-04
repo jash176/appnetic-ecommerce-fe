@@ -69,7 +69,6 @@ const ProductDetails = () => {
   return (
     <SafeAreaView style={styles.container}>
       <GenericScrollView onScroll={handleScroll} scrollEventThrottle={16}>
-      <CommonHeader title='Products' showBack onBackPress={() =>router.back()}/>
         <ProductImageCarousel images={data.images} showDots width={Dimensions.get("window").width} />
         <View style={styles.productDetailContainer}>
           <View>

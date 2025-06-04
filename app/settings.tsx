@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Application from 'expo-application';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import CommonHeader from '@/components/ui/CommonHeader';
+import payloadClient, { createAuthenticatedClient } from '@/lib/api/payloadClient';
 
 // Setting types
 interface NotificationSettings {
@@ -34,7 +35,7 @@ interface PrivacySettings {
 
 export default function SettingsScreen() {
   const { top } = useSafeAreaInsets();
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, logout, token, user } = useAuthStore();
   const colorScheme = useColorScheme();
   
   // Loading state
@@ -146,16 +147,30 @@ export default function SettingsScreen() {
       Alert.alert('Error', 'Failed to save settings.');
     }
   };
+
+  const deleteAccount = async () => {
+    try {
+      const client = token ? createAuthenticatedClient(token) : payloadClient;
+      if(user) {
+        await client.collections.users.deleteById({id: user.id});
+        await logout();
+        await AsyncStorage.clear();
+        Alert.alert('Success', 'Your account has been deleted successfully.');
+      }
+    }catch(error) {
+      Alert.alert('Error', 'Failed to delete account.');
+    }
+  }
   
   // Clear all app data
   const handleClearAppData = () => {
     Alert.alert(
-      'Clear App Data',
-      'Are you sure you want to clear all app data? This will sign you out and reset all settings.',
+      'Delete account?',
+      'This will clear all app data including your account information, preferences, and saved items. This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         { 
-          text: 'Clear', 
+          text: 'Delete', 
           style: 'destructive',
           onPress: async () => {
             try {
@@ -173,33 +188,6 @@ export default function SettingsScreen() {
             }
           }
         }
-      ]
-    );
-  };
-  
-  // Language selector
-  const handleLanguageSelect = () => {
-    Alert.alert(
-      'Select Language',
-      'Choose your preferred language',
-      [
-        { text: 'English', onPress: () => saveSettings('app', 'language', 'English') },
-        { text: 'Hindi', onPress: () => saveSettings('app', 'language', 'Hindi') },
-        { text: 'Cancel', style: 'cancel' }
-      ]
-    );
-  };
-  
-  // Currency selector
-  const handleCurrencySelect = () => {
-    Alert.alert(
-      'Select Currency',
-      'Choose your preferred currency',
-      [
-        { text: 'Indian Rupee (₹)', onPress: () => saveSettings('app', 'currency', 'INR') },
-        { text: 'US Dollar ($)', onPress: () => saveSettings('app', 'currency', 'USD') },
-        { text: 'Euro (€)', onPress: () => saveSettings('app', 'currency', 'EUR') },
-        { text: 'Cancel', style: 'cancel' }
       ]
     );
   };
@@ -260,7 +248,7 @@ export default function SettingsScreen() {
             style={[styles.linkItem, styles.dangerItem]} 
             onPress={handleClearAppData}
           >
-            <ThemedText style={styles.dangerText}>Clear App Data</ThemedText>
+            <ThemedText style={styles.dangerText}>Delete account</ThemedText>
             <Ionicons name="trash-outline" size={18} color="#FF3B30" />
           </TouchableOpacity>
         </View>  

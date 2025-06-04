@@ -3,7 +3,7 @@ import payloadClient from "../payloadClient";
 import { PrivacyPolicy } from "../services/types";
 
 export const usePrivacyPolicy = () => {
-  const [privacyPolicy, setPrivacyPolicy] = useState<PrivacyPolicy>();
+  const [privacyPolicy, setPrivacyPolicy] = useState<PrivacyPolicy & {contentHTML: string}>();
   const [isLoading, setIsLoading] = useState(true);
   const fetchPrivacyPolicy = async () => {
     setIsLoading(true);
@@ -11,7 +11,7 @@ export const usePrivacyPolicy = () => {
       const client = payloadClient;
       const response = await client.globals["privacy-policies"].get();
       if (response) {
-        setPrivacyPolicy(response);
+        setPrivacyPolicy(response as any);
       }
     } catch (error) {
     } finally {

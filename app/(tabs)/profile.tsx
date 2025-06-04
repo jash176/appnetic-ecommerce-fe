@@ -24,7 +24,7 @@ type MenuItem = {
 }
 
 const Profile = () => {
-  const { user, isAuthenticated, logout, isLoading, login } = useAuthStore()
+  const { user, isAuthenticated, logout, isLoading, login, register } = useAuthStore()
 
   const menuItems: MenuItem[] = [
     {
@@ -75,9 +75,14 @@ const Profile = () => {
     }
   }
 
+  const handleRegister = async (email: string, password: string) => {
+    await register(email, password, email.split('@')[0])
+    router.push('/(tabs)');
+  }
+
   if (!isAuthenticated) {
     return (
-      <LoginRegistrationComponent onLogin={handleLogin} onRegister={() => {}} />
+      <LoginRegistrationComponent onLogin={handleLogin} onRegister={handleRegister} />
     )
   }
 
@@ -89,14 +94,12 @@ const Profile = () => {
           <View style={styles.profileSection}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
-                {user?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
+                {user?.name[0].toUpperCase() || user?.email?.[0]?.toUpperCase()}
               </Text>
             </View>
             <View style={{ marginLeft: 14 }}>
               <Text style={styles.name}>
-                {user?.firstName && user?.lastName
-                  ? `${user.firstName} ${user.lastName}`
-                  : user?.email}
+                {user?.name || user?.email}
               </Text>
               <Text style={styles.email}>{user?.email}</Text>
             </View>

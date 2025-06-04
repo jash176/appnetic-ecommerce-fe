@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCartStore } from '@/store/cartStore';
 
 export default function TabLayout() {
-  const { getItemCount, items } = useCartStore();
+  const items = useCartStore(state => state.items);
   
   return (
     <Tabs
@@ -65,7 +65,7 @@ export default function TabLayout() {
         options={{
           title: 'Cart',
           tabBarIcon: ({ focused }) => {
-            const itemCount = getItemCount();
+            const itemCount = items.length
             return(
             <View>
               <Ionicons 

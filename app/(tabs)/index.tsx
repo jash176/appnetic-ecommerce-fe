@@ -5,6 +5,8 @@ import CollectionCard from '@/components/ui/ecommerce/CollectionCard';
 import FeaturedProduct from '@/components/ui/ecommerce/FeaturedProduct';
 import Footer from '@/components/ui/Footer';
 import { useHomeLayout } from '@/lib/api/hooks/useHomeLayout';
+import { router } from 'expo-router';
+import { Category, Product } from '@/lib/api/services/types';
 
 export default function HomeScreen() {
   const { data, isLoading } = useHomeLayout();
@@ -18,8 +20,9 @@ export default function HomeScreen() {
       })}
       {
         data.featuredProducts?.map((item, index) => {
+          const product = item.product as Product;
           return (
-            <FeaturedProduct key={`product_${item.id}`} item={item} />
+            <FeaturedProduct key={`product_${item.id}`} item={item} onPress={() => router.push(`/${product.id}`)} />
           )
         })
       }
@@ -30,8 +33,12 @@ export default function HomeScreen() {
         scrollEnabled={false}
         contentContainerStyle={{ marginTop: 70 }}
         renderItem={({ item }) => {
+          const category = item.category as Category;
           return (
-            <CategoryCard item={item} />
+            <CategoryCard item={item} onPress={() => router.push({
+              pathname: '/category/[id]',
+              params: { id: category.id, name: category.name },
+            })} />
           )
         }}
         ItemSeparatorComponent={() => <View style={{ marginTop: 70 }} />}

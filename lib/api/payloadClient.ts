@@ -2,7 +2,8 @@ import { createClient } from 'payload-rest-client';
 import { Config } from './services/types';
 
 // Get API URL from environment variables
-const apiUrl = 'https://better-sensibly-bullfrog.ngrok-free.app/api';
+const apiUrl = 'http://192.168.29.51:3001/api';
+// const apiUrl = 'https://better-sensibly-bullfrog.ngrok-free.app/api';
 
 // Define locale types if needed (can be extended later)
 type Locales = 'en' | 'es';

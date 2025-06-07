@@ -23,7 +23,7 @@ export const useCart = () => {
     productId: number;
     variant?: string;
   }) => {
-    showLoading("Adding item to cart...")
+    // showLoading("Adding item to cart...")
     await addItemToCart({ productId, variant });
     hideLoading();
   }

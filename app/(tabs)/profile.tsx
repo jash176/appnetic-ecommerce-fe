@@ -76,7 +76,7 @@ const Profile = () => {
   }
 
   const handleRegister = async (email: string, password: string) => {
-    await register(email, password, email.split('@')[0])
+    const createdUser = await register(email, password, email.split('@')[0]);
     router.push('/(tabs)');
   }
 

@@ -175,11 +175,7 @@ export default function SettingsScreen() {
           onPress: async () => {
             try {
               setIsLoading(true);
-              await AsyncStorage.clear();
-              // Force logout
-              await logout();
-              Alert.alert('Success', 'All app data has been cleared.');
-              router.replace('/');
+              deleteAccount()
             } catch (error) {
               console.error('Error clearing app data:', error);
               Alert.alert('Error', 'Failed to clear app data.');

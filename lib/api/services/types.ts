@@ -82,6 +82,7 @@ export interface Config {
     deviceTokens: DeviceToken;
     home_layouts: HomeLayout;
     cart: Cart;
+    sizeChart: SizeChart;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -103,6 +104,7 @@ export interface Config {
     deviceTokens: DeviceTokensSelect<false> | DeviceTokensSelect<true>;
     home_layouts: HomeLayoutsSelect<false> | HomeLayoutsSelect<true>;
     cart: CartSelect<false> | CartSelect<true>;
+    sizeChart: SizeChartSelect<false> | SizeChartSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -151,9 +153,9 @@ export interface User {
   id: number;
   name: string;
   /**
-   * Stores this user has access to
+   * The store this user belongs to
    */
-  stores?: (number | Store)[] | null;
+  store?: (number | null) | Store;
   /**
    * Super Admin: Can create stores and assign owners. Store Owner: Manages a single store. Staff: Limited store access. Customer: No admin access.
    */
@@ -225,6 +227,7 @@ export interface Store {
 export interface Media {
   id: number;
   alt: string;
+  store: number | Store;
   prefix?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -272,7 +275,6 @@ export interface Product {
   images?:
     | {
         image: number | Media;
-        alt: string;
         isPrimary?: boolean | null;
         id?: string | null;
       }[]
@@ -305,6 +307,16 @@ export interface Product {
     trackInventory?: boolean | null;
     quantity?: number | null;
   };
+  /**
+   * Link other color variants of this product.
+   */
+  colorOptions?:
+    | {
+        color: string;
+        product: number | Product;
+        id?: string | null;
+      }[]
+    | null;
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -736,6 +748,59 @@ export interface Cart {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sizeChart".
+ */
+export interface SizeChart {
+  id: number;
+  title: string;
+  store: number | Store;
+  products?: (number | Product)[] | null;
+  /**
+   * Automatically attach to products matching conditions.
+   */
+  isAutomated?: boolean | null;
+  conditions?: {
+    type: 'tag' | 'category' | 'custom';
+    tags?: (number | Tag)[] | null;
+    categories?: (number | Category)[] | null;
+    /**
+     * Advanced: Custom product match query in JSON format.
+     */
+    customQuery?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  chart: {
+    label: string;
+    value: string;
+    id?: string | null;
+  }[];
+  notes?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -800,6 +865,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'cart';
         value: number | Cart;
+      } | null)
+    | ({
+        relationTo: 'sizeChart';
+        value: number | SizeChart;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -849,7 +918,7 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
-  stores?: T;
+  store?: T;
   role?: T;
   phone?: T;
   isDeleted?: T;
@@ -869,6 +938,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  store?: T;
   prefix?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -944,7 +1014,6 @@ export interface ProductsSelect<T extends boolean = true> {
     | T
     | {
         image?: T;
-        alt?: T;
         isPrimary?: T;
         id?: T;
       };
@@ -976,6 +1045,13 @@ export interface ProductsSelect<T extends boolean = true> {
     | {
         trackInventory?: T;
         quantity?: T;
+      };
+  colorOptions?:
+    | T
+    | {
+        color?: T;
+        product?: T;
+        id?: T;
       };
   seo?:
     | T
@@ -1290,6 +1366,34 @@ export interface CartSelect<T extends boolean = true> {
   subtotal?: T;
   discountTotal?: T;
   total?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sizeChart_select".
+ */
+export interface SizeChartSelect<T extends boolean = true> {
+  title?: T;
+  store?: T;
+  products?: T;
+  isAutomated?: T;
+  conditions?:
+    | T
+    | {
+        type?: T;
+        tags?: T;
+        categories?: T;
+        customQuery?: T;
+      };
+  chart?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }

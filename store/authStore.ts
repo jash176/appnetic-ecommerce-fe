@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import payloadClient, { createAuthenticatedClient } from '@/lib/api/payloadClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '@/lib/api/services/types';
+import { getStoreId } from '@/service/storeService';
 
 // Storage keys
 export const AUTH_TOKEN_KEY = 'auth_token';
@@ -100,16 +101,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: true, error: null });
       
       // Call PayloadCMS register endpoint
-      await payloadClient.collections.users.create({
-        
+      const createdUser = await payloadClient.collections.users.create({
         doc: {
           email,
           password,
           phone,
           name,
           role: 'customer',
+          store: getStoreId(),
         }
       });
+      if(createdUser.doc) {
+        await payloadClient.collections.customers.create({
+          doc :{
+            user: createdUser.doc.id,
+            store: getStoreId(),
+            name: createdUser.doc.name,
+            email: createdUser.doc.email,
+            phone: createdUser.doc.phone,
+            isDeleted: false,
+          }
+        })
+      }
       
       // Login after successful registration
       await get().login(email, password);

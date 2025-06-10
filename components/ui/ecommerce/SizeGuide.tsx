@@ -4,15 +4,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 
 interface SizeGuideProps {
-  sizeGuideData?: {
-    title: string;
-    measurements: {
-      size: string;
-      chest: string;
-      waist: string;
-      hips: string;
-    }[];
-  };
+  productId: number;
 }
 
 const defaultSizeGuideData = {
@@ -26,7 +18,7 @@ const defaultSizeGuideData = {
   ]
 };
 
-const SizeGuide = ({ sizeGuideData = defaultSizeGuideData }: SizeGuideProps) => {
+const SizeGuide = ({ productId }: SizeGuideProps) => {
   const [modalVisible, setModalVisible] = useState(false);
   const { width } = Dimensions.get('window');
 
@@ -48,7 +40,7 @@ const SizeGuide = ({ sizeGuideData = defaultSizeGuideData }: SizeGuideProps) => 
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { width: width - 32 }]}>
             <View style={styles.modalHeader}>
-              <ThemedText type="title">{sizeGuideData.title}</ThemedText>
+              {/* <ThemedText type="title">{sizeGuideData.title}</ThemedText> */}
               <TouchableOpacity 
                 onPress={() => setModalVisible(false)}
                 style={styles.closeButton}
@@ -65,7 +57,7 @@ const SizeGuide = ({ sizeGuideData = defaultSizeGuideData }: SizeGuideProps) => 
                 <ThemedText type="subtitle" style={styles.headerCell}>Hips</ThemedText>
               </View>
 
-              {sizeGuideData.measurements.map((measurement, index) => (
+              {/* {sizeGuideData.measurements.map((measurement, index) => (
                 <View 
                   key={index} 
                   style={[
@@ -78,7 +70,7 @@ const SizeGuide = ({ sizeGuideData = defaultSizeGuideData }: SizeGuideProps) => 
                   <ThemedText style={styles.cell}>{measurement.waist}</ThemedText>
                   <ThemedText style={styles.cell}>{measurement.hips}</ThemedText>
                 </View>
-              ))}
+              ))} */}
             </View>
 
             <View style={styles.footer}>

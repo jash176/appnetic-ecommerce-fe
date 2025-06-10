@@ -91,7 +91,7 @@ const ProductDetails = () => {
           </View>
           <View style={{ marginTop: 48, marginBottom: 30 }}>
             <VariantSelector variantTitle='SELECT SIZES' options={data.variants} selectedValue={selectedVariant as string | undefined} onSelect={setSelectedVariant} />
-            <SizeGuide />
+            <SizeGuide productId={data.id} />
           </View>
           <View ref={addButtonRef}>
             <Button title='ADD TO CART' onPress={handleAddToCart} fullWidth />

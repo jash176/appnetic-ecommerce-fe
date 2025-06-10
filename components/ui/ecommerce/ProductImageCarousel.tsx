@@ -7,7 +7,7 @@ import { getFullImageUrl } from '@/utils/functions';
 interface IProductImageCarousel {
   showDots?: boolean;
   width?: number;
-  images: { image: number | Media; alt: string; isPrimary?: boolean | null | undefined; id?: string | null | undefined; }[] | undefined | null
+  images: { image: number | Media; isPrimary?: boolean | null | undefined; id?: string | null | undefined; }[] | undefined | null
 }
 
 const ProductImageCarousel = (props: IProductImageCarousel) => {

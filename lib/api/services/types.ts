@@ -777,8 +777,21 @@ export interface SizeChart {
       | null;
   };
   chart: {
+    /**
+     * Label for the size row, e.g., "S", "M", "L", "XL"
+     */
     label: string;
-    value: string;
+    values: {
+      /**
+       * Measurement type, e.g., "Chest", "Length", "Waist"
+       */
+      metric: string;
+      /**
+       * Value of the measurement, e.g., "33", "35", etc.
+       */
+      value: string;
+      id?: string | null;
+    }[];
     id?: string | null;
   }[];
   notes?: {
@@ -1390,7 +1403,13 @@ export interface SizeChartSelect<T extends boolean = true> {
     | T
     | {
         label?: T;
-        value?: T;
+        values?:
+          | T
+          | {
+              metric?: T;
+              value?: T;
+              id?: T;
+            };
         id?: T;
       };
   notes?: T;

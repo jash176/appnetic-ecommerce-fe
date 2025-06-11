@@ -1,35 +1,73 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Modal, TouchableOpacity, Dimensions } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { Ionicons } from '@expo/vector-icons';
-
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Modal,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
+import { ThemedText } from "@/components/ThemedText";
+import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import { SizeChart } from "@/lib/api/services/types";
 interface SizeGuideProps {
   productId: number;
 }
 
-const defaultSizeGuideData = {
-  title: "Size Guide",
-  measurements: [
-    { size: "XS", chest: "32-34", waist: "24-26", hips: "34-36" },
-    { size: "S", chest: "34-36", waist: "26-28", hips: "36-38" },
-    { size: "M", chest: "36-38", waist: "28-30", hips: "38-40" },
-    { size: "L", chest: "38-40", waist: "30-32", hips: "40-42" },
-    { size: "XL", chest: "40-42", waist: "32-34", hips: "42-44" },
-  ]
-};
+interface ChartData {
+  /**
+   * Label for the size row, e.g., "S", "M", "L", "XL"
+   */
+  label: string;
+  values: {
+    /**
+     * Measurement type, e.g., "Chest", "Length", "Waist"
+     */
+    metric: string;
+    /**
+     * Value of the measurement, e.g., "33", "35", etc.
+     */
+    value: string;
+    id?: string | null;
+  }[];
+  id?: string | null;
+}
 
 const SizeGuide = ({ productId }: SizeGuideProps) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const { width } = Dimensions.get('window');
+  const { width } = Dimensions.get("window");
+  const [chartData, setChartData] = useState<ChartData[] | null>(null);
+  const [allMetrics, setMetrics] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    const fetchSizeGuideData = async () => {
+      const response = await axios.get(
+        `${process.env.EXPO_PUBLIC_API_URL}/size-chart/${productId}`
+      );
+      if (response.data && response.data.chart.length > 0) {
+        const chartData = response.data.chart as ChartData[];
+        const metricSet = new Set<string>();
+        metricSet.add("Size")
+        chartData.forEach((row) => {
+          row.values.forEach((v) => metricSet.add(v.metric));
+        });
+        setChartData(chartData);
+        setMetrics(Array.from(metricSet));
+      }
+    };
+    fetchSizeGuideData();
+  }, [productId]);
 
   return (
     <>
-      <TouchableOpacity 
-        style={styles.sizeGuideButton}
-        onPress={() => setModalVisible(true)}
-      >
-        <ThemedText type="link">Size Guide</ThemedText>
-      </TouchableOpacity>
+      {chartData !== null && (
+        <TouchableOpacity
+          style={styles.sizeGuideButton}
+          onPress={() => setModalVisible(true)}
+        >
+          <ThemedText type="link">Size Guide</ThemedText>
+        </TouchableOpacity>
+      )}
 
       <Modal
         animationType="slide"
@@ -41,7 +79,7 @@ const SizeGuide = ({ productId }: SizeGuideProps) => {
           <View style={[styles.modalContent, { width: width - 32 }]}>
             <View style={styles.modalHeader}>
               {/* <ThemedText type="title">{sizeGuideData.title}</ThemedText> */}
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setModalVisible(false)}
                 style={styles.closeButton}
               >
@@ -51,26 +89,41 @@ const SizeGuide = ({ productId }: SizeGuideProps) => {
 
             <View style={styles.tableContainer}>
               <View style={styles.tableHeader}>
-                <ThemedText type="subtitle" style={styles.headerCell}>Size</ThemedText>
-                <ThemedText type="subtitle" style={styles.headerCell}>Chest</ThemedText>
-                <ThemedText type="subtitle" style={styles.headerCell}>Waist</ThemedText>
-                <ThemedText type="subtitle" style={styles.headerCell}>Hips</ThemedText>
+                {allMetrics &&
+                  allMetrics.map((metric) => (
+                    <ThemedText
+                      key={metric}
+                      type="subtitle"
+                      style={styles.headerCell}
+                    >
+                      {metric}
+                    </ThemedText>
+                  ))}
               </View>
-
-              {/* {sizeGuideData.measurements.map((measurement, index) => (
-                <View 
-                  key={index} 
-                  style={[
-                    styles.tableRow,
-                    index % 2 === 0 && styles.evenRow
-                  ]}
-                >
-                  <ThemedText style={styles.cell}>{measurement.size}</ThemedText>
-                  <ThemedText style={styles.cell}>{measurement.chest}</ThemedText>
-                  <ThemedText style={styles.cell}>{measurement.waist}</ThemedText>
-                  <ThemedText style={styles.cell}>{measurement.hips}</ThemedText>
-                </View>
-              ))} */}
+              {chartData &&
+                chartData.map((row, rowIndex) => (
+                  <View
+                    key={rowIndex}
+                    style={[
+                      styles.tableRow,
+                      rowIndex % 2 === 0 && styles.evenRow,
+                    ]}
+                  >
+                    <ThemedText style={styles.cell}>{row.label}</ThemedText>
+                    {allMetrics &&
+                      allMetrics.map((metric) => {
+                        if(metric === "Size") return null;
+                        const match = row.values.find(
+                          (v) => v.metric === metric
+                        );
+                        return (
+                          <ThemedText style={styles.cell}>
+                            {match?.value ?? "--"}
+                          </ThemedText>
+                        );
+                      })}
+                  </View>
+                ))}
             </View>
 
             <View style={styles.footer}>
@@ -88,24 +141,24 @@ const SizeGuide = ({ productId }: SizeGuideProps) => {
 const styles = StyleSheet.create({
   sizeGuideButton: {
     marginTop: 8,
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 16,
-    maxHeight: '80%',
+    maxHeight: "80%",
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   closeButton: {
@@ -113,42 +166,42 @@ const styles = StyleSheet.create({
   },
   tableContainer: {
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: "#e0e0e0",
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#f5f5f5',
+    flexDirection: "row",
+    backgroundColor: "#f5f5f5",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   headerCell: {
     flex: 1,
     padding: 12,
-    textAlign: 'center',
-    fontWeight: 'bold',
+    textAlign: "center",
+    fontWeight: "bold",
   },
   tableRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   evenRow: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
   },
   cell: {
     flex: 1,
     padding: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
   footer: {
     marginTop: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   note: {
-    color: '#666',
+    color: "#666",
   },
 });
 
-export default SizeGuide; 
+export default SizeGuide;

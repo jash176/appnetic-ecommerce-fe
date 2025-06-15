@@ -1,26 +1,26 @@
 {
   "expo": {
-    "name": "com-pavao-appnetic",
-    "slug": "com-pavao-appnetic",
+    "name": "GRAPHEXCLUB",
+    "slug": "graphexclub",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "graphexclub",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
-      "bundleIdentifier": "com.pavao.appnetic"
+      "bundleIdentifier": "com.graphexclub.appnetic"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#000000"
       },
       "googleServicesFile": "./google-services.json",
-      "package": "com.pavao.appnetic"
+      "package": "com.graphexclub.appnetic"
     },
     "web": {
       "bundler": "metro",
@@ -35,7 +35,7 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#000000"
         }
       ],
       [
@@ -80,7 +80,7 @@
       "eas": {
         "projectId": "9c01ad34-ea4b-41ce-875b-32bc54b13bd7"
       },
-      "razorpayApiKey": "rzp_test_gHHvCEfpFf9412"
+      "razorpayApiKey": "rzp_test_hlKHh3CaHjv4jL"
     },
     "owner": "jash176"
   }

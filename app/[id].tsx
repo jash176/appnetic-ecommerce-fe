@@ -13,14 +13,14 @@ import { router, useLocalSearchParams } from 'expo-router'
 import * as Haptics from 'expo-haptics'
 import { useProduct } from '@/lib/api/hooks/useProducts'
 import { useCart } from '@/lib/api/hooks/useCart'
-import CommonHeader from '@/components/ui/CommonHeader'
+import RenderHTML from 'react-native-render-html'
 
 const ProductDetails = () => {
   const { id } = useLocalSearchParams();
-  const { data, isLoading, isError, refetch } = useProduct(parseInt(id as string))
+  const { data } = useProduct(parseInt(id as string))
   const [isAddButtonVisible, setIsAddButtonVisible] = useState(false);
   const addButtonRef = useRef<View>(null);
-  const { height: windowHeight } = useWindowDimensions();
+  const { height: windowHeight,width } = useWindowDimensions();
   const [selectedVariant, setSelectedVariant] = useState('');
   const { addToCart } = useCart();
 
@@ -37,10 +37,10 @@ const ProductDetails = () => {
     }
   }, [data]);
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  const handleScroll = () => {
     if (!addButtonRef.current) return;
 
-    addButtonRef.current.measureInWindow((x, y, width, height) => {
+    addButtonRef.current.measureInWindow((_x, y, _width, height) => {
       const isVisible = y >= -60 && y + height <= (windowHeight + 60);
       setIsAddButtonVisible(isVisible);
     });
@@ -98,7 +98,10 @@ const ProductDetails = () => {
           </View>
           <View style={{ marginVertical: 50 }}>
             <Accordion title='DESCRIPTION & FIT' >
-              <ThemedText>Hello World</ThemedText>
+              <RenderHTML
+                        contentWidth={width}
+                        source={{ html: data.description }}
+                      />
             </Accordion>
             <Accordion title='DELIVERY & PAYMENT' >
               <ThemedText>Free delivery on orders above Rs. 999. Cash on delivery available.</ThemedText>

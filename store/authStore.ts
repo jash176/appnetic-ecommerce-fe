@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       
       // Use payload client for login
       const response = await payloadClient.collections.users.login({
-        email,
+        email: `${getStoreId()}-${email}`,
         password,
       });
       
@@ -188,7 +188,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const response = await payloadClient.collections.users.find({
       where: {
         email: {
-          equals: email,
+          equals: `${getStoreId()}-${email}`,
         },
       },
       limit: 1,

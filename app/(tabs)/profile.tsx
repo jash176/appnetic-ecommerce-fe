@@ -1,11 +1,9 @@
 import {
   StyleSheet,
-  Text,
   View,
   ScrollView,
   TouchableOpacity,
   Alert,
-  Platform,
 } from 'react-native'
 import React from 'react'
 import { Ionicons } from '@expo/vector-icons'
@@ -24,7 +22,7 @@ type MenuItem = {
 }
 
 const Profile = () => {
-  const { user, isAuthenticated, logout, isLoading, login, register } = useAuthStore()
+  const { user, isAuthenticated, logout, isLoading, login, register } = useAuthStore();
 
   const menuItems: MenuItem[] = [
     {
@@ -93,15 +91,15 @@ const Profile = () => {
         <View style={styles.card}>
           <View style={styles.profileSection}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
+              <ThemedText style={styles.avatarText}>
                 {user?.name[0].toUpperCase() || user?.email?.[0]?.toUpperCase()}
-              </Text>
+              </ThemedText>
             </View>
             <View style={{ marginLeft: 14 }}>
-              <Text style={styles.name}>
+              <ThemedText style={styles.name}>
                 {user?.name || user?.email}
-              </Text>
-              <Text style={styles.email}>{user?.email}</Text>
+              </ThemedText>
+              <ThemedText style={styles.email}>{user?.rawEmail}</ThemedText>
             </View>
           </View>
           <TouchableOpacity
@@ -109,7 +107,7 @@ const Profile = () => {
             onPress={() => router.push('/edit-profile')}
           >
             <Ionicons name="create-outline" size={18} color="#000" />
-            <Text style={styles.editButtonText}>Edit</Text>
+            <ThemedText style={styles.editButtonText}>Edit</ThemedText>
           </TouchableOpacity>
         </View>
 
@@ -125,7 +123,7 @@ const Profile = () => {
               <View style={styles.menuIconWrapper}>
                 <Ionicons name={item.icon} size={22} color="#333" />
               </View>
-              <Text style={styles.menuText}>{item.title}</Text>
+              <ThemedText style={styles.menuText}>{item.title}</ThemedText>
               <Ionicons name="chevron-forward" size={18} color="#aaa" />
             </TouchableOpacity>
           ))}
@@ -142,7 +140,7 @@ const Profile = () => {
 
         {/* Clear Cache */}
         <TouchableOpacity onPress={() => AsyncStorage.clear()}>
-          <Text style={styles.clearData}>Clear App Cache</Text>
+          <ThemedText style={styles.clearData}>Clear App Cache</ThemedText>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

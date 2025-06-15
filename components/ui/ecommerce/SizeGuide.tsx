@@ -9,7 +9,6 @@ import {
 import { ThemedText } from "@/components/ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
-import { SizeChart } from "@/lib/api/services/types";
 interface SizeGuideProps {
   productId: number;
 }

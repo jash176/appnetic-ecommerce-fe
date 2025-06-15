@@ -152,6 +152,7 @@ export interface UserAuthOperations {
 export interface User {
   id: number;
   name: string;
+  rawEmail?: string | null;
   /**
    * The store this user belongs to
    */
@@ -249,21 +250,7 @@ export interface Product {
   id: number;
   title: string;
   store: number | Store;
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
+  description: string;
   price: number;
   /**
    * Original price for sale items
@@ -931,6 +918,7 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  rawEmail?: T;
   store?: T;
   role?: T;
   phone?: T;

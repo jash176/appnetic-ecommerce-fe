@@ -48,8 +48,8 @@ const CategoryProducts = () => {
               onSortChange={(sort) => console.log('Sort:', sort)}
               onFilterChange={(range) => console.log('Range:', range)}
               filterRange={[0, 5000]}
-              initialSort="price_asc"
               initialRange={[100, 1000]}
+              selectedSort='createdAt'
             />}
           </View>
         }

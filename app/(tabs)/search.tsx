@@ -60,7 +60,7 @@ export default function SearchScreenPage() {
             onSearch={handleSearch}
             initialValue={""}
           />
-          <ThemedText style={styles.searchHeading} type='heading'>Categories</ThemedText>
+          {categories.length > 0 && <ThemedText style={styles.searchHeading} type='heading'>Categories</ThemedText>}
           {totalDocs > 5 && <ThemedText type='title' style={styles.viewAllText} onPress={() => { }}>View all</ThemedText>}
           <FlatList
             data={categories}

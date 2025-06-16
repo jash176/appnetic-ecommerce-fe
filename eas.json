@@ -16,13 +16,13 @@
       "distribution": "internal",
       "developmentClient": false,
       "android": {
-        "buildType": "aab"
+        "buildType": "app-bundle"
       }
     },
     "production": {
       "developmentClient": false,
       "android": {
-        "buildType": "aab"
+        "buildType": "app-bundle"
       },
       "autoIncrement": true
     }

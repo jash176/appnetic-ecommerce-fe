@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:877700013698:android:e44e84932d4daf18711e9b",
+        "android_client_info": {
+          "package_name": "com.graphexclub.appnetic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkr4ZYi2f_MJMH2oJjzMtSaZRyflLPvbM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:877700013698:android:33f28ad2944ce2c9711e9b",
         "android_client_info": {
           "package_name": "com.pavao.appnetic"

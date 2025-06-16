@@ -26,6 +26,8 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="myapp"/>
         <data android:scheme="exp+com-pavao-appnetic"/>
+        <data android:scheme="graphexclub"/>
+        <data android:scheme="exp+graphexclub"/>
       </intent-filter>
     </activity>
   </application>

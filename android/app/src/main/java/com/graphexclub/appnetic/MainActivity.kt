@@ -1,4 +1,4 @@
-package com.pavao.appnetic
+package com.graphexclub.appnetic
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

@@ -31,7 +31,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
 }
 expoAutolinking.useExpoModules()
 
-rootProject.name = 'com-pavao-appnetic'
+rootProject.name = 'GRAPHEXCLUB'
 
 expoAutolinking.useExpoVersionCatalog()
 

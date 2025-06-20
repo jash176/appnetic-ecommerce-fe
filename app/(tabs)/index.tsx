@@ -15,7 +15,10 @@ export default function HomeScreen() {
     <GenericScrollView>
       {data.featuredCollections?.map((item, index) => {
         return (
-          <CollectionCard key={`collection_${item.id}`} item={item} />
+          <CollectionCard onPress={() => router.push({
+            pathname: '/collection/[id]',
+            params: { id: item.collection.toString(), name: item.title },
+          })} key={`collection_${item.id}`} item={item} />
         )
       })}
       {

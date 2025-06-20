@@ -1,31 +1,10 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-import Accordion from './Accordion'
+import { Image, StyleSheet, View } from 'react-native'
 import { ThemedText } from '../ThemedText'
 const Footer = () => {
   return (
     <View>
       <View style={{ paddingVertical: 48, paddingHorizontal: 16 }}>
-        <Accordion title='SHOP'>
-          <Accordion.Item>
-            <ThemedText>T-SHIRTS</ThemedText>
-          </Accordion.Item>
-          <Accordion.Item>
-            <ThemedText>T-SHIRTS</ThemedText>
-          </Accordion.Item>
-          <Accordion.Item>
-            <ThemedText>T-SHIRTS</ThemedText>
-          </Accordion.Item>
-          <Accordion.Item>
-            <ThemedText>T-SHIRTS</ThemedText>
-          </Accordion.Item>
-          <Accordion.Item>
-            <ThemedText>T-SHIRTS</ThemedText>
-          </Accordion.Item>
-        </Accordion>
-        <Accordion title='HELP'>
-          <ThemedText>T-SHIRTS</ThemedText>
-        </Accordion>
       </View>
       <View style={styles.footerContainer}>
         <Image source={require("../../assets/images/app-logo.png")} style={styles.appLogo} />
@@ -43,7 +22,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16
   },
   appLogo: {
-    height: 60,
-    width: 60
+    resizeMode: 'contain',
+    width: 180
   }
 })

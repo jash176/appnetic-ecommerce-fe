@@ -162,6 +162,63 @@ export function useProductsByCategory(categoryId: number | undefined, params?: {
 }
 
 /**
+ * Custom hook for fetching products by category
+ */
+export function useProductsByCollection(collectionId: number | undefined, params?: {
+  page?: number;
+  limit?: number;
+}) {
+  const [data, setData] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const { token } = useAuthStore();
+
+  const fetchProducts = useCallback(async () => {
+    if (!collectionId) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setIsError(false);
+
+    try {
+      const client = token
+        ? createAuthenticatedClient(token)
+        : payloadClient;
+
+      const queryParams: any = {
+        where: {
+          id: {
+            equals: collectionId
+          },
+          store: {
+            equals: getStoreId()
+          }
+        }
+      };
+
+      if (params?.page) queryParams.page = params.page;
+      if (params?.limit) queryParams.limit = params.limit;
+
+      const result = await client.collections.collections.find(queryParams);
+      setData(result.docs as any);
+    } catch (error) {
+      console.error('Error fetching products by category:', error);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [collectionId, params, token]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  return { data, isLoading, isError, refetch: fetchProducts };
+}
+
+/**
  * Custom hook for searching products
  */
 export function useSearchProducts(query: string | undefined, params?: {
@@ -285,6 +342,34 @@ export const useCateogryProductsCount = (id: string) => {
       where: {
         categories: {
           contains: id
+        },
+        store: {
+          equals: getStoreId(),
+        }
+      }
+    })
+    setCount(count.totalDocs)
+  }
+  useEffect(() => {
+    fetchCount();
+  }, [fetchCount]);
+  return {count}
+}
+
+export const useCollectionProductsCount = (id: number) => {
+  const [count, setCount] = useState(0)
+  const { token } = useAuthStore();
+  
+  const fetchCount = async () => {
+    const client = token
+    ? createAuthenticatedClient(token)
+    : payloadClient;
+    const count = await client.collections.collections.find({
+      depth: 0,
+      limit: 0,
+      where: {
+        id: {
+          equals: id
         },
         store: {
           equals: getStoreId(),

@@ -36,9 +36,9 @@ export default function CheckoutPage() {
   // Form state for checkout
   const [formData, setFormData] = useState<CheckoutFormData>({
     name:
-      user?.firstName && user?.lastName
-        ? `${user.firstName} ${user.lastName}`
-        : user?.firstName || "",
+      user?.name
+        ? `${user.name}`
+        : user?.name || "",
     email: user?.email || "",
     phone: "",
     shippingAddress: {

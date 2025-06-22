@@ -100,7 +100,7 @@ const ProductDetails = () => {
             <Accordion title='DESCRIPTION & FIT' >
               <RenderHTML
                         contentWidth={width}
-                        source={{ html: data.description }}
+                        source={{ html: data.descriptionHtml || '' }}
                       />
             </Accordion>
             <Accordion title='DELIVERY & PAYMENT' >

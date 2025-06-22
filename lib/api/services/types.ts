@@ -250,7 +250,22 @@ export interface Product {
   id: number;
   title: string;
   store: number | Store;
-  description: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  descriptionHtml?: string | null;
   price: number;
   /**
    * Original price for sale items
@@ -1006,6 +1021,7 @@ export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   store?: T;
   description?: T;
+  descriptionHtml?: T;
   price?: T;
   compareAtPrice?: T;
   status?: T;

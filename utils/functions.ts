@@ -4,7 +4,7 @@ import { AUTH_TOKEN_KEY } from "@/store/authStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const getFullImageUrl = (filename: string) =>
-  `https://repzaskxofppkxvcmokf.supabase.co/storage/v1/object/public/media/media/${filename}`
+  `${process.env.EXPO_PUBLIC_STORAGE_URL}${filename}`
 
 export const formatPrice = (price: number, currency = 'INR'): string => {
   return `Rs. ${price.toFixed(2)}`;
@@ -87,7 +87,6 @@ export const addItemToCart = async (
     const product = item.product as Product;
     return product.id === Number(productId) && item.variant === variant
   });
-  console.log('Existing item index:', existingItemIndex)
   if (existingItemIndex > -1) {
     // Update quantity
     cart.items[existingItemIndex].quantity += 1

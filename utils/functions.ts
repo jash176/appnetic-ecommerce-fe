@@ -4,7 +4,7 @@ import { AUTH_TOKEN_KEY } from "@/store/authStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const getFullImageUrl = (filename: string) =>
-  `${process.env.EXPO_PUBLIC_STORAGE_URL}${filename}`
+  `${process.env.EXPO_PUBLIC_STORAGE_URL}/${filename}`
 
 export const formatPrice = (price: number, currency = 'INR'): string => {
   return `Rs. ${price.toFixed(2)}`;
